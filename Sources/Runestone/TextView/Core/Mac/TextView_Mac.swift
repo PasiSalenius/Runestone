@@ -538,6 +538,7 @@ open class TextView: NSView, NSMenuItemValidation {
     override public func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         textViewController.performFullLayoutIfNeeded()
+        windowKeyStateDidChange()
     }
 
     /// Overridden by subclasses to define their default cursor rectangles.
@@ -561,6 +562,9 @@ open class TextView: NSView, NSMenuItemValidation {
         // Layout to ensure the selection erctangles and caret as correctly placed.
         setNeedsLayout()
         layoutIfNeeded()
+        
+        // Resign first responder here because maintaining it does not work
+        resignFirstResponder()
     }
 
     /// Returns the syntax node at the specified location in the document.

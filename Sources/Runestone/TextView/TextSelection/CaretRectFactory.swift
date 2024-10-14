@@ -24,7 +24,7 @@ final class CaretRectFactory {
     func caretRect(at location: Int, allowMovingCaretToNextLineFragment: Bool) -> CGRect {
         let leadingLineSpacing = gutterWidthService.gutterWidth + textContainerInset.left
         let safeLocation = min(max(location, 0), stringView.string.length)
-        let line = lineManager.line(containingCharacterAt: safeLocation)!
+        guard let line = lineManager.line(containingCharacterAt: safeLocation) else { return .zero }
         let lineController = lineControllerStorage.getOrCreateLineController(for: line)
         let lineLocalLocation = safeLocation - line.location
         if allowMovingCaretToNextLineFragment && shouldMoveCaretToNextLineFragment(forLocation: lineLocalLocation, in: line) {

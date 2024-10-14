@@ -15,6 +15,11 @@ extension TextView: NSTextInputClient {
         textViewController.selectedRange?.nonNegativeLength ?? NSRange(location: 0, length: 0)
     }
 
+    /// Set current selection range of the text view.
+    public func setSelectedRange(_ range: NSRange?) {
+        textViewController.selectedRange = range
+    }
+
     /// Inserts the given string into the receiver, replacing the specified content.
     /// - Parameters:
     ///   - string: The text to insert.
