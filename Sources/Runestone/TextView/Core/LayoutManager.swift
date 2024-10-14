@@ -247,7 +247,7 @@ extension LayoutManager {
     }
 
     func closestIndex(to point: CGPoint) -> Int {
-        let adjustedXPosition = point.x - textContainerInset.left
+        let adjustedXPosition = point.x
         let adjustedYPosition = point.y - textContainerInset.top
         let adjustedPoint = CGPoint(x: adjustedXPosition, y: adjustedYPosition)
         if let line = lineManager.line(containingYOffset: adjustedPoint.y), let lineController = lineControllerStorage[line.id] {
