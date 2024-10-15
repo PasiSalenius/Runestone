@@ -540,7 +540,12 @@ open class TextView: NSView, NSMenuItemValidation {
         textViewController.performFullLayoutIfNeeded()
         windowKeyStateDidChange()
     }
-
+    
+    override public func viewWillMove(toSuperview newSuperview: NSView?) {
+        super.viewWillMove(toSuperview: newSuperview)
+        windowKeyStateDidChange()
+    }
+    
     /// Overridden by subclasses to define their default cursor rectangles.
     override public func resetCursorRects() {
         super.resetCursorRects()
