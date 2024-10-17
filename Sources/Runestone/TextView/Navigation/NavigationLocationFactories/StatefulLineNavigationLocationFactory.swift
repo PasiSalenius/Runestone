@@ -44,6 +44,13 @@ final class StatefulLineNavigationLocationFactory {
     }
 
     func location(movingFrom location: Int, byLineCount offset: Int = 1, inDirection direction: TextDirection) -> Int {
+        let operation = operation(movingFrom: location, byLineCount: offset, inDirection: direction)
+        previousOperation = operation
+        return operation.destinationLocation
+
+        /*
+         * Do not use previous operation as it breaks moving between empty lines
+         
         if let previousOperation {
             let directionedOffset = DirectionedOffset(offset: offset, inDirection: direction)
             let newDirectionedOffset = previousOperation.offset + directionedOffset
@@ -61,6 +68,7 @@ final class StatefulLineNavigationLocationFactory {
             previousOperation = operation
             return operation.destinationLocation
         }
+         */
     }
 
     func reset() {
