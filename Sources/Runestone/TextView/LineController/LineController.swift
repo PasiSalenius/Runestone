@@ -425,7 +425,7 @@ extension LineController {
             if let caretLocation = lineFragment.caretLocation(forLineLocalLocation: lineLocalLocation) {
                 let xPosition = CTLineGetOffsetForStringIndex(lineFragment.line, caretLocation, nil)
                 let yPosition = lineFragment.yPosition + (lineFragment.scaledSize.height - lineFragment.baseSize.height) / 2
-                return CGRect(x: xPosition - Caret.width / 2, y: yPosition, width: Caret.width, height: lineFragment.baseSize.height)
+                return CGRect(x: xPosition, y: yPosition, width: Caret.width, height: lineFragment.baseSize.height)
             }
         }
         let yPosition = (estimatedLineFragmentHeight * lineFragmentHeightMultiplier - estimatedLineFragmentHeight) / 2
