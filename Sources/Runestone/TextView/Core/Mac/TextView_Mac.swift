@@ -567,9 +567,6 @@ open class TextView: NSView, NSMenuItemValidation {
         // Layout to ensure the selection erctangles and caret as correctly placed.
         setNeedsLayout()
         layoutIfNeeded()
-        
-        // Resign first responder here because maintaining it does not work
-        resignFirstResponder()
     }
 
     /// Returns the syntax node at the specified location in the document.
@@ -631,6 +628,11 @@ private extension TextView {
 
     @objc private func windowKeyStateDidChange() {
         isWindowKey = window?.isKeyWindow ?? false
+
+        // First responder status is not updated when window changes key
+        if !isWindowKey {
+            resignFirstResponder()
+        }
     }
 }
 
