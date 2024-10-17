@@ -501,6 +501,7 @@ open class TextView: NSView, NSMenuItemValidation {
     @discardableResult
     override open func resignFirstResponder() -> Bool {
         guard isEditing && shouldEndEditing else {
+            print("resignFirstResponder guard return false")
             return false
         }
         let didResignFirstResponder = super.resignFirstResponder()
@@ -509,6 +510,7 @@ open class TextView: NSView, NSMenuItemValidation {
             textViewController.isEditing = false
             editorDelegate?.textViewDidEndEditing(self)
         }
+        print("resignFirstResponder didResignFirstResponder \(didResignFirstResponder)")
         return didResignFirstResponder
     }
 
@@ -628,11 +630,6 @@ private extension TextView {
 
     @objc private func windowKeyStateDidChange() {
         isWindowKey = window?.isKeyWindow ?? false
-
-        // First responder status is not updated when window changes key
-        if !isWindowKey {
-            resignFirstResponder()
-        }
     }
 }
 
@@ -675,10 +672,12 @@ private extension TextView {
 
     private func updateCaretVisibility() {
         if isWindowKey && isFirstResponder && selectedRange().length == 0 {
+            print("caret isHidden = false   isWindowKey = \(isWindowKey) isFirstResponder = \(isFirstResponder)")
             caretView.isHidden = false
             caretView.isBlinkingEnabled = true
             caretView.delayBlinkIfNeeded()
         } else {
+            print("caret isHidden = true   isWindowKey = \(isWindowKey) isFirstResponder = \(isFirstResponder)")
             caretView.isHidden = true
             caretView.isBlinkingEnabled = false
         }
