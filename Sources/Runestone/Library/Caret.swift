@@ -4,7 +4,7 @@ enum Caret {
     #if os(iOS)
     static let width: CGFloat = 2
     #else
-    static let width: CGFloat = 1
+    static let width: CGFloat = 2
     #endif
 
     static func defaultHeight(for font: MultiPlatformFont?) -> CGFloat {
