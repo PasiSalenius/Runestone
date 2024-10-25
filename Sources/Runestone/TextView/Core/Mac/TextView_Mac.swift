@@ -36,7 +36,14 @@ open class TextView: NSView, NSMenuItemValidation {
     }
     /// Whether the text view is in a state where the contents can be edited.
     public var isEditing: Bool {
-        textViewController.isEditing
+        get {
+            textViewController.isEditing
+        }
+        set {
+            if newValue != isEditing {
+                updateCaretVisibility()
+            }
+        }
     }
     /// The text that the text view displays.
     public var text: String {
@@ -421,13 +428,8 @@ open class TextView: NSView, NSMenuItemValidation {
             }
         }
     }
-    private var isFirstResponder = false {
-        didSet {
-            if isFirstResponder != oldValue {
-                updateCaretVisibility()
-            }
-        }
-    }
+    private var isFirstResponder = false
+    
     private var shouldBeginEditing: Bool {
         guard isEditable else {
             return false
@@ -483,33 +485,29 @@ open class TextView: NSView, NSMenuItemValidation {
     /// Notifies the receiver that it's about to become first responder in its NSWindow.
     @discardableResult
     override open func becomeFirstResponder() -> Bool {
-        guard !isEditing && shouldBeginEditing else {
+        guard super.becomeFirstResponder() else {
             return false
         }
-        let didBecomeFirstResponder = super.becomeFirstResponder()
-        if didBecomeFirstResponder {
-            isFirstResponder = true
+        isFirstResponder = true
+        if shouldBeginEditing {
             textViewController.isEditing = true
             editorDelegate?.textViewDidBeginEditing(self)
-        } else {
-            textViewController.isEditing = false
         }
-        return didBecomeFirstResponder
+        return true
     }
 
     /// Notifies the receiver that it's been asked to relinquish its status as first responder in its window.
     @discardableResult
     override open func resignFirstResponder() -> Bool {
-        guard isEditing && shouldEndEditing else {
+        guard super.resignFirstResponder() else {
             return false
         }
-        let didResignFirstResponder = super.resignFirstResponder()
-        if didResignFirstResponder {
-            isFirstResponder = false
+        isFirstResponder = false
+        if shouldEndEditing {
             textViewController.isEditing = false
             editorDelegate?.textViewDidEndEditing(self)
         }
-        return didResignFirstResponder
+        return true
     }
 
     /// Informs the view's subviews that the view's bounds rectangle size has changed.
@@ -669,7 +667,7 @@ private extension TextView {
     }
 
     private func updateCaretVisibility() {
-        if isWindowKey && isFirstResponder && selectedRange().length == 0 {
+        if isWindowKey && isEditing && selectedRange().length == 0 {
             caretView.isHidden = false
             caretView.isBlinkingEnabled = true
             caretView.delayBlinkIfNeeded()

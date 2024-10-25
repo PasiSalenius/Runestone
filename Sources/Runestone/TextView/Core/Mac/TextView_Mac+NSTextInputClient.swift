@@ -4,9 +4,9 @@ import AppKit
 extension TextView: NSTextInputClient {
     // swiftlint:disable:next prohibited_super_call
     override public func doCommand(by selector: Selector) {
-//        #if DEBUG
-//        print(NSStringFromSelector(selector))
-//        #endif
+        guard isEditable else {
+            return
+        }
         super.doCommand(by: selector)
     }
 
@@ -25,6 +25,9 @@ extension TextView: NSTextInputClient {
     ///   - string: The text to insert.
     ///   - replacementRange: The range of content to replace in the receiver's text storage.
     public func insertText(_ string: Any, replacementRange: NSRange) {
+        guard isEditable else {
+            return
+        }
         guard let string = string as? String else {
             return
         }
