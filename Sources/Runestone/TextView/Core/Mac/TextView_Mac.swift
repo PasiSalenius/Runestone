@@ -735,9 +735,11 @@ private extension TextView {
 private extension TextView {
     private func setupMenu() {
         menu = NSMenu()
-        menu?.addItem(withTitle: L10n.Menu.ItemTitle.cut, action: #selector(cut(_:)), keyEquivalent: "")
-        menu?.addItem(withTitle: L10n.Menu.ItemTitle.copy, action: #selector(copy(_:)), keyEquivalent: "")
-        menu?.addItem(withTitle: L10n.Menu.ItemTitle.paste, action: #selector(paste(_:)), keyEquivalent: "")
+        menu?.addItem(withTitle: L10n.Menu.ItemTitle.cut, action: #selector(cut(_:)), keyEquivalent: "x")
+        menu?.addItem(withTitle: L10n.Menu.ItemTitle.copy, action: #selector(copy(_:)), keyEquivalent: "c")
+        menu?.addItem(withTitle: L10n.Menu.ItemTitle.paste, action: #selector(paste(_:)), keyEquivalent: "v")
+        menu?.addItem(.separator())
+        menu?.addItem(withTitle: L10n.Menu.ItemTitle.selectAll, action: #selector(selectAll(_:)), keyEquivalent: "a")
     }
 }
 

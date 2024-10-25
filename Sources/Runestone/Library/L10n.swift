@@ -20,6 +20,8 @@ internal enum L10n {
       internal static let paste = L10n.tr("Localizable", "menu.item_title.paste", fallback: "Copy")
       /// Replace
       internal static let replace = L10n.tr("Localizable", "menu.item_title.replace", fallback: "Replace")
+      /// Select All
+      internal static let selectAll = L10n.tr("Localizable", "menu.item_title.selectAll", fallback: "Select All")
     }
   }
   internal enum Undo {
