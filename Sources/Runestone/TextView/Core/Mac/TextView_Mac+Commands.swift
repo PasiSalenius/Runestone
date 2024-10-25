@@ -4,6 +4,9 @@ import AppKit
 public extension TextView {
     /// Deletes a character from the displayed text.
     override func deleteForward(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         guard let selectedRange = textViewController.selectedRange else {
             return
         }
@@ -20,6 +23,9 @@ public extension TextView {
 
     /// Deletes a character from the displayed text.
     override func deleteBackward(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         guard var selectedRange = textViewController.markedRange ?? textViewController.selectedRange?.nonNegativeLength else {
             return
         }
@@ -52,6 +58,9 @@ public extension TextView {
 
     /// Inserts a newline character.
     override func insertNewline(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         if textViewController.shouldChangeText(in: textViewController.rangeForInsertingText, replacementText: lineEndings.symbol) {
             textViewController.indentController.insertLineBreak(in: textViewController.rangeForInsertingText, using: lineEndings.symbol)
         }
@@ -59,6 +68,9 @@ public extension TextView {
 
     /// Inserts a tab character.
     override func insertTab(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         let indentString = indentStrategy.string(indentLevel: 1)
         if textViewController.shouldChangeText(in: textViewController.rangeForInsertingText, replacementText: indentString) {
             textViewController.replaceText(in: textViewController.rangeForInsertingText, with: indentString)
@@ -80,6 +92,9 @@ public extension TextView {
     ///
     /// - Parameter sender: The object calling this method.
     @objc func paste(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         let selectedRange = selectedRange()
         if let string = NSPasteboard.general.string(forType: .string) {
             let preparedText = textViewController.prepareTextForInsertion(string)
@@ -91,6 +106,9 @@ public extension TextView {
     ///
     /// - Parameter sender: The object calling this method.
     @objc func cut(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         let selectedRange = selectedRange()
         if selectedRange.length > 0, let text = textViewController.text(in: selectedRange) {
             NSPasteboard.general.setString(text, forType: .string)
@@ -107,6 +125,9 @@ public extension TextView {
 
     /// Performs the undo operations in the last undo group.
     @objc func undo(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         if let undoManager = undoManager, undoManager.canUndo {
             undoManager.undo()
         }
@@ -114,6 +135,9 @@ public extension TextView {
 
     /// Performs the operations in the last group on the redo stack.
     @objc func redo(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         if let undoManager = undoManager, undoManager.canRedo {
             undoManager.redo()
         }
@@ -121,17 +145,26 @@ public extension TextView {
 
     /// Delete the word in front of the insertion point.
     override func deleteWordForward(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         deleteText(toBoundary: .word, inDirection: .forward)
     }
 
     /// Delete the word behind the insertion point.
     override func deleteWordBackward(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
         deleteText(toBoundary: .word, inDirection: .backward)
     }
 }
 
 private extension TextView {
     private func deleteText(toBoundary boundary: TextBoundary, inDirection direction: TextDirection) {
+        guard isEditable else {
+            return
+        }
         guard let selectedRange = textViewController.selectedRange else {
             return
         }
