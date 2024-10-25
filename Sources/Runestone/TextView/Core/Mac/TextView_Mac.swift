@@ -591,16 +591,18 @@ open class TextView: NSView, NSMenuItemValidation {
     /// - Parameter menuItem: An NSMenuItem object that represents the menu item.
     /// - Returns: `true` to enable menuItem, `false` to disable it.
     public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        if menuItem.action == #selector(copy(_:)) || menuItem.action == #selector(cut(_:)) {
+        if menuItem.action == #selector(copy(_:)) {
             return selectedRange().length > 0
+        } else if menuItem.action == #selector(cut(_:)) {
+            return isEditable && selectedRange().length > 0
         } else if menuItem.action == #selector(paste(_:)) {
-            return NSPasteboard.general.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier])
+            return isEditable && NSPasteboard.general.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier])
         } else if menuItem.action == #selector(selectAll(_:)) {
             return !text.isEmpty
         } else if menuItem.action == #selector(undo(_:)) {
-            return undoManager?.canUndo ?? false
+            return isEditable && undoManager?.canUndo ?? false
         } else if menuItem.action == #selector(redo(_:)) {
-            return undoManager?.canRedo ?? false
+            return isEditable && undoManager?.canRedo ?? false
         } else {
             return true
         }
