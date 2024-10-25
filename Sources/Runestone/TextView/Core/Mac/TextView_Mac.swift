@@ -41,6 +41,7 @@ open class TextView: NSView, NSMenuItemValidation {
         }
         set {
             if newValue != isEditing {
+                textViewController.isEditing = newValue
                 updateCaretVisibility()
             }
         }
@@ -490,7 +491,7 @@ open class TextView: NSView, NSMenuItemValidation {
         }
         isFirstResponder = true
         if shouldBeginEditing {
-            textViewController.isEditing = true
+            isEditing = true
             editorDelegate?.textViewDidBeginEditing(self)
         }
         return true
@@ -504,7 +505,7 @@ open class TextView: NSView, NSMenuItemValidation {
         }
         isFirstResponder = false
         if shouldEndEditing {
-            textViewController.isEditing = false
+            isEditing = false
             editorDelegate?.textViewDidEndEditing(self)
         }
         return true
