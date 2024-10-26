@@ -540,6 +540,11 @@ extension LayoutManager {
                 lineNumberView.textColor = theme.lineNumberColor
             }
         }
+        gutterBackgroundView.backgroundColor = theme.gutterBackgroundColor
+        gutterBackgroundView.hairlineColor = theme.gutterHairlineColor
+        invisibleCharacterConfiguration.textColor = theme.invisibleCharactersColor
+        gutterSelectionBackgroundView.backgroundColor = theme.selectedLinesGutterBackgroundColor
+        lineSelectionBackgroundView.backgroundColor = theme.selectedLineBackgroundColor
     }
 
     private func setupViewHierarchy() {
