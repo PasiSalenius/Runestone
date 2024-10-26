@@ -401,13 +401,19 @@ open class TextView: NSView, NSMenuItemValidation {
             }
         }
     }
-    /// The color of the selection highlight. It is most common to set this to the same color as the color used for the insertion point.
-    public var selectionHighlightColor: NSColor = .label.withAlphaComponent(0.2) {
+    /// The color of the selection highlight.
+    public var selectionHighlightColor: NSColor = .selectedTextBackgroundColor {
         didSet {
-            if selectionHighlightColor != oldValue {
-                for (_, view) in selectionViewReuseQueue.visibleViews {
-                    view.backgroundColor = selectionHighlightColor
-                }
+            if selectionHighlightColor != oldValue && isFirstResponder {
+                updateSelectedRectangles()
+            }
+        }
+    }
+    /// The color of the selection highlight when view is not first responder.
+    public var unemphasizedSelectionHighlightColor: NSColor = .unemphasizedSelectedTextBackgroundColor {
+        didSet {
+            if unemphasizedSelectionHighlightColor != oldValue && !isFirstResponder {
+                updateSelectedRectangles()
             }
         }
     }
@@ -429,7 +435,13 @@ open class TextView: NSView, NSMenuItemValidation {
             }
         }
     }
-    private var isFirstResponder = false
+    private var isFirstResponder = false {
+        didSet {
+            if isFirstResponder != oldValue {
+                needsLayout = true
+            }
+        }
+    }
     
     private var shouldBeginEditing: Bool {
         guard isEditable else {
@@ -723,8 +735,8 @@ private extension TextView {
             let view = selectionViewReuseQueue.dequeueView(forKey: key)
             view.frame = selectionRect.rect
             view.wantsLayer = true
-            view.backgroundColor = selectionHighlightColor
-            scrollContentView.addSubview(view)
+            view.backgroundColor = isFirstResponder ? selectionHighlightColor : unemphasizedSelectionHighlightColor
+            scrollContentView.addSubview(view, positioned: .below, relativeTo: nil)
             appearedViewKeys.insert(key)
         }
         let disappearedViewKeys = Set(selectionViewReuseQueue.visibleViews.keys).subtracting(appearedViewKeys)
