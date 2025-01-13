@@ -301,7 +301,7 @@ extension LayoutManager {
 
     func layoutLineSelectionIfNeeded() {
         if needsLayoutLineSelection {
-            needsLayoutLineSelection = true
+            needsLayoutLineSelection = false
             CATransaction.begin()
             CATransaction.setDisableActions(false)
             layoutLineSelection()
