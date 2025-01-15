@@ -200,7 +200,9 @@ final class TextViewController {
     var lineEndings: LineEnding = .lf
     var theme: Theme = DefaultTheme() {
         didSet {
-            applyThemeToChildren()
+            if theme !== oldValue {
+                applyThemeToChildren()
+            }
         }
     }
     var characterPairs: [CharacterPair] = [] {
