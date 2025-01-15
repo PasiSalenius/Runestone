@@ -540,7 +540,10 @@ extension LayoutManager {
                 lineNumberView.textColor = theme.lineNumberColor
             }
         }
-        gutterBackgroundView.backgroundColor = theme.gutterBackgroundColor
+        
+        // Not setting the background color here seems to fix between light and dark appearance
+        // gutterBackgroundView.backgroundColor = theme.gutterBackgroundColor
+        
         gutterBackgroundView.hairlineColor = theme.gutterHairlineColor
         invisibleCharacterConfiguration.textColor = theme.invisibleCharactersColor
         gutterSelectionBackgroundView.backgroundColor = theme.selectedLinesGutterBackgroundColor
