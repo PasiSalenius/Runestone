@@ -33,6 +33,10 @@ extension NSView {
     }
 
     func layoutIfNeeded() {}
+    
+    var isFirstResponder: Bool {
+        window?.firstResponder == self
+    }
 }
 
 func UIGraphicsGetCurrentContext() -> CGContext? {

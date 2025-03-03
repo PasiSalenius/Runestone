@@ -31,11 +31,6 @@ open class TextView: NSView, NSMenuItemValidation {
         set {
             if newValue != isEditable {
                 textViewController.isEditable = newValue
-                
-                if isEditable && isFirstResponder && shouldBeginEditing {
-                    isEditing = true
-                    editorDelegate?.textViewDidBeginEditing(self)
-                }
             }
         }
     }
@@ -438,11 +433,6 @@ open class TextView: NSView, NSMenuItemValidation {
             if isWindowKey != oldValue {
                 updateCaretVisibility()
             }
-        }
-    }
-    private var isFirstResponder: Bool {
-        get {
-            window?.firstResponder == self
         }
     }
     

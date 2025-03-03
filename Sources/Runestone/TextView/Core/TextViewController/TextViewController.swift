@@ -61,6 +61,11 @@ final class TextViewController {
     }
     var isEditable = true {
         didSet {
+            if isEditable != oldValue && isEditable && textView.isFirstResponder {
+                isEditing = true
+                textView.editorDelegate?.textViewDidBeginEditing(textView)
+            }
+
             if isEditable != oldValue && !isEditable && isEditing {
                 textView.resignFirstResponder()
                 isEditing = false
