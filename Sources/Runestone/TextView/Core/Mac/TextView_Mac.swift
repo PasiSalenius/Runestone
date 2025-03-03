@@ -31,6 +31,11 @@ open class TextView: NSView, NSMenuItemValidation {
         set {
             if newValue != isEditable {
                 textViewController.isEditable = newValue
+                
+                if isEditable && isFirstResponder && shouldBeginEditing {
+                    isEditing = true
+                    editorDelegate?.textViewDidBeginEditing(self)
+                }
             }
         }
     }
@@ -435,11 +440,9 @@ open class TextView: NSView, NSMenuItemValidation {
             }
         }
     }
-    private var isFirstResponder = false {
-        didSet {
-            if isFirstResponder != oldValue {
-                needsLayout = true
-            }
+    private var isFirstResponder: Bool {
+        get {
+            window?.firstResponder == self
         }
     }
     
@@ -501,7 +504,7 @@ open class TextView: NSView, NSMenuItemValidation {
         guard super.becomeFirstResponder() else {
             return false
         }
-        isFirstResponder = true
+        needsLayout = true
         if shouldBeginEditing {
             isEditing = true
             editorDelegate?.textViewDidBeginEditing(self)
@@ -515,7 +518,7 @@ open class TextView: NSView, NSMenuItemValidation {
         guard super.resignFirstResponder() else {
             return false
         }
-        isFirstResponder = false
+        needsLayout = true
         if shouldEndEditing {
             isEditing = false
             editorDelegate?.textViewDidEndEditing(self)
