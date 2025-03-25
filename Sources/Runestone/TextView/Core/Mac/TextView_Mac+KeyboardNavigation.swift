@@ -51,6 +51,11 @@ public extension TextView {
     }
 
     /// Move the insertion pointer to the beginning of the document.
+    override func scrollToBeginningOfDocument(_ sender: Any?) {
+        textViewController.moveToBeginningOfDocument()
+    }
+
+    /// Move the insertion pointer to the beginning of the document.
     override func moveToBeginningOfDocument(_ sender: Any?) {
         textViewController.moveToBeginningOfDocument()
     }
@@ -78,6 +83,11 @@ public extension TextView {
     /// Move the selection to include the beginning of the paragraph.
     override func moveToBeginningOfParagraphAndModifySelection(_ sender: Any?) {
         textViewController.moveToBeginningOfParagraphAndModifySelection()
+    }
+
+    /// Move the insertion pointer to the end of the document.
+    override func scrollToEndOfDocument(_ sender: Any?) {
+        textViewController.moveToEndOfDocument()
     }
 
     /// Move the insertion pointer to the end of the document.
