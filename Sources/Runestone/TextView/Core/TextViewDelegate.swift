@@ -143,7 +143,7 @@ public extension TextViewDelegate {
     func textViewDidLoopToFirstHighlightedRange(_ textView: TextView) {}
 
     func textView(_ textView: TextView, canReplaceTextIn highlightedRange: HighlightedRange) -> Bool {
-        false
+        textView.isEditable
     }
 
     func textView(_ textView: TextView, replaceTextIn highlightedRange: HighlightedRange) {}

@@ -499,6 +499,10 @@ open class TextView: NSView, NSMenuItemValidation {
             isEditing = true
             editorDelegate?.textViewDidBeginEditing(self)
         }
+        // Notify find controller that this text view is now focused
+        if #available(macOS 12, *) {
+            notifyFindControllerDidBecomeFocused()
+        }
         return true
     }
 
@@ -593,6 +597,95 @@ open class TextView: NSView, NSMenuItemValidation {
         textViewController.text(in: range)
     }
 
+    /// Search for the specified query in the text view.
+    ///
+    /// The code below shows how a ``SearchQuery`` can be constructed and passed to ``search(for:)``.
+    ///
+    /// ```swift
+    /// let query = SearchQuery(text: "foo", matchMethod: .contains, isCaseSensitive: false)
+    /// let results = textView.search(for: query)
+    /// ```
+    ///
+    /// - Parameter query: Query to find matches for.
+    /// - Returns: Results matching the query.
+    public func search(for query: SearchQuery) -> [SearchResult] {
+        let searchController = SearchController(stringView: textViewController.stringView)
+        searchController.delegate = self
+        return searchController.search(for: query)
+    }
+
+    /// Search for the specified query and return results that take a replacement string into account.
+    ///
+    /// When searching for a regular expression this function will perform pattern matching and take the matched groups into account in the returned results.
+    ///
+    /// The code below shows how a ``SearchQuery`` can be constructed and passed to ``search(for:replacingMatchesWith:)`` and how the returned search results can be used to perform a replace operation.
+    ///
+    /// ```swift
+    /// let query = SearchQuery(text: "foo", matchMethod: .contains, isCaseSensitive: false)
+    /// let results = textView.search(for: query, replacingMatchesWith: "bar")
+    /// let replacements = results.map { BatchReplaceSet.Replacement(range: $0.range, text: $0.replacementText) }
+    /// let batchReplaceSet = BatchReplaceSet(replacements: replacements)
+    /// textView.replaceText(in: batchReplaceSet)
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - query: Query to find matches for.
+    ///   - replacementString: String to replace matches with. Can refer to groups in a regular expression using $0, $1, $2 etc.
+    /// - Returns: Results matching the query.
+    public func search(for query: SearchQuery, replacingMatchesWith replacementString: String) -> [SearchReplaceResult] {
+        let searchController = SearchController(stringView: textViewController.stringView)
+        searchController.delegate = self
+        return searchController.search(for: query, replacingMatchesWith: replacementString)
+    }
+
+    /// Replaces the text in the specified matches.
+    /// - Parameters:
+    ///   - batchReplaceSet: Set of ranges to replace with a text.
+    public func replaceText(in batchReplaceSet: BatchReplaceSet) {
+        textViewController.replaceText(in: batchReplaceSet)
+    }
+
+    /// Returns a peek into the text view's underlying attributed string.
+    /// - Parameter range: Range of text to include in text view. The returned result may span a larger range than the one specified.
+    /// - Returns: Text preview containing the specified range.
+    public func textPreview(containing range: NSRange) -> TextPreview? {
+        textViewController.layoutManager.textPreview(containing: range)
+    }
+
+    /// Selects a highlighted range behind the selected range if possible.
+    public func selectPreviousHighlightedRange() {
+        textViewController.highlightNavigationController.selectPreviousRange()
+    }
+
+    /// Selects a highlighted range after the selected range if possible.
+    public func selectNextHighlightedRange() {
+        textViewController.highlightNavigationController.selectNextRange()
+    }
+
+    /// Selects the highlighed range at the specified index.
+    /// - Parameter index: Index of highlighted range to select.
+    public func selectHighlightedRange(at index: Int) {
+        textViewController.highlightNavigationController.selectRange(at: index)
+    }
+
+    /// Scrolls the text view to reveal the text in the specified range.
+    ///
+    /// The function will scroll the text view as little as possible while revealing as much as possible of the specified range. It is not guaranteed that the entire range is visible after performing the scroll.
+    ///
+    /// - Parameters:
+    ///   - range: The range of text to scroll into view.
+    public func scrollRangeToVisible(_ range: NSRange) {
+        textViewController.scrollRangeToVisible(range)
+    }
+
+    /// Replaces the text that is in the specified range.
+    /// - Parameters:
+    ///   - range: A range of text in the document.
+    ///   - text: A string to replace the text in range.
+    public func replace(_ range: NSRange, withText text: String) {
+        textViewController.replaceText(in: range, with: text)
+    }
+
     /// Implemented to override the default action of enabling or disabling a specific menu item.
     /// - Parameter menuItem: An NSMenuItem object that represents the menu item.
     /// - Returns: `true` to enable menuItem, `false` to disable it.
@@ -609,6 +702,14 @@ open class TextView: NSView, NSMenuItemValidation {
             return isEditable && undoManager?.canUndo ?? false
         } else if menuItem.action == #selector(redo(_:)) {
             return isEditable && undoManager?.canRedo ?? false
+        } else if #available(macOS 12, *), menuItem.action == #selector(showFindPanel(_:)) {
+            return true
+        } else if #available(macOS 12, *), menuItem.action == #selector(findNext(_:)) || menuItem.action == #selector(findPrevious(_:)) {
+            // These are enabled if there are search results
+            return true
+        } else if menuItem.action == #selector(performTextFinderAction(_:)) {
+            // Enable NSTextFinder actions (bridged to custom find panel on macOS 12+)
+            return true
         } else {
             return true
         }
@@ -746,6 +847,12 @@ private extension TextView {
         menu?.addItem(withTitle: L10n.Menu.ItemTitle.paste, action: #selector(paste(_:)), keyEquivalent: "v")
         menu?.addItem(.separator())
         menu?.addItem(withTitle: L10n.Menu.ItemTitle.selectAll, action: #selector(selectAll(_:)), keyEquivalent: "a")
+        if #available(macOS 12, *) {
+            menu?.addItem(.separator())
+            menu?.addItem(withTitle: "Find...", action: #selector(showFindPanel(_:)), keyEquivalent: "f")
+            menu?.addItem(withTitle: "Find Next", action: #selector(findNext(_:)), keyEquivalent: "g")
+            menu?.addItem(withTitle: "Find Previous", action: #selector(findPrevious(_:)), keyEquivalent: "G")
+        }
     }
 }
 
@@ -762,6 +869,13 @@ extension TextView: TextViewControllerDelegate {
         caretView.delayBlinkIfNeeded()
         updateCaretVisibility()
         scrollToVisibleLocationIfNeeded()
+    }
+}
+
+// MARK: - SearchControllerDelegate
+extension TextView: SearchControllerDelegate {
+    func searchController(_ searchController: SearchController, linePositionAt location: Int) -> LinePosition? {
+        textViewController.lineManager.linePosition(at: location)
     }
 }
 #endif

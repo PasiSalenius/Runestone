@@ -1,6 +1,9 @@
 #if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
 #endif
+import Foundation
 
 /// Default theme used by Runestone when no other theme has been set.
 public final class DefaultTheme: Runestone.Theme {
@@ -83,6 +86,17 @@ public final class DefaultTheme: Runestone.Theme {
             return nil
         @unknown default:
             return nil
+        }
+    }
+#elseif os(macOS)
+    @available(macOS 12, *)
+    public func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
+        if isSelected {
+            let color = MultiPlatformColor(themeColorNamed: "search_match_highlighted")
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
+        } else {
+            let color = MultiPlatformColor(themeColorNamed: "search_match_found")
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
         }
     }
 #endif

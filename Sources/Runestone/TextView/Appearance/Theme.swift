@@ -67,6 +67,18 @@ public protocol Theme: AnyObject {
     /// - Returns: The object used for highlighting the provided text range, or `nil` if the range should not be highlighted.
     @available(iOS 16, *)
     func highlightedRange(forFoundTextRange foundTextRange: NSRange, ofStyle style: UITextSearchFoundTextStyle) -> HighlightedRange?
+#elseif os(macOS)
+    /// Highlighted range for a text range matching a search query.
+    ///
+    /// This function is called when highlighting a search result.
+    ///
+    /// Return `nil` to prevent highlighting the range.
+    /// - Parameters:
+    ///   - foundTextRange: The text range matching a search query.
+    ///   - isSelected: Whether this is the currently selected match (true) or just a found match (false).
+    /// - Returns: The object used for highlighting the provided text range, or `nil` if the range should not be highlighted.
+    @available(macOS 12, *)
+    func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange?
 #endif
 }
 
@@ -115,6 +127,15 @@ public extension Theme {
             return nil
         @unknown default:
             return nil
+        }
+    }
+#elseif os(macOS)
+    @available(macOS 12, *)
+    func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
+        if isSelected {
+            return HighlightedRange(range: foundTextRange, color: .systemYellow)
+        } else {
+            return HighlightedRange(range: foundTextRange, color: .systemYellow.withAlphaComponent(0.2))
         }
     }
 #endif
