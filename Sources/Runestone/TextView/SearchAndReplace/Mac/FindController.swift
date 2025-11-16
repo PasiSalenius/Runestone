@@ -7,14 +7,16 @@ final class FindController: NSObject {
 
     weak var textView: TextView? {
         didSet {
-            guard findPanelWindow.isVisible else { return }
+            // Even if no search is active, update replace button state
+            updateReplaceButtonState()
+
+            guard textView != oldValue else { return }
+            
+            oldValue?.highlightedRanges.removeAll()
             
             // When switching to a different text view, re-run the search
-            if textView !== oldValue, textView != nil, !searchQuery.isEmpty {
+            if findPanelWindow.isVisible, !searchQuery.isEmpty {
                 performSearch(query: searchQuery, options: searchOptions)
-            } else if textView !== oldValue {
-                // Even if no search is active, update replace button state
-                updateReplaceButtonState()
             }
         }
     }
