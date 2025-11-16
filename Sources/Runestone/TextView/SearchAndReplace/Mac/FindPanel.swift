@@ -93,8 +93,8 @@ final class FindPanel: NSView {
         matchCountLabel.isEditable = false
         matchCountLabel.isBordered = false
         matchCountLabel.drawsBackground = false
-        matchCountLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-        matchCountLabel.textColor = NSColor.secondaryLabelColor
+        matchCountLabel.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        matchCountLabel.textColor = .secondaryLabelColor
         matchCountLabel.alignment = .right
         
         matchCountLabel.setContentHuggingPriority(.init(rawValue: 1), for: .horizontal)
