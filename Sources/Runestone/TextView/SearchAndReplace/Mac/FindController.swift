@@ -1,7 +1,6 @@
 #if os(macOS)
 import AppKit
 
-@available(macOS 12, *)
 final class FindController: NSObject {
     static let shared = FindController()
 
@@ -32,10 +31,10 @@ final class FindController: NSObject {
 
     // Background queue for search operations to prevent UI blocking
     private let searchQueue = OperationQueue()
-    private var currentSearchOperation: Operation?
+    private var searchOperation: Operation?
 
     // Maximum number of highlights to display for performance
-    private let maxVisibleHighlights = 1000
+    private let maxVisibleHighlights = 200
 
     private override init() {
         let panel = FindPanel()
@@ -159,7 +158,7 @@ final class FindController: NSObject {
         }
 
         // Cancel any existing search operation
-        currentSearchOperation?.cancel()
+        searchOperation?.cancel()
 
         // Create a new search operation to run in the background
         let operation = BlockOperation()
@@ -185,20 +184,20 @@ final class FindController: NSObject {
             // Perform search on background thread
             let searchResults = textView.search(for: searchQuery)
 
-            // Check if cancelled before updating UI
-            guard !operation.isCancelled else { return }
-
-            // Get selected range for positioning
-            let selectedRange = textView.selectedRange()
-
             // Update UI on main thread
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+
+                // Check if cancelled before updating UI
+                guard !operation.isCancelled else { return }
 
                 // Verify this search is still relevant (query hasn't changed)
                 guard self.searchQuery == query else { return }
 
                 self.searchResults = searchResults
+
+                // Get selected range for positioning
+                let selectedRange = textView.selectedRange()
 
                 if !searchResults.isEmpty {
                     // Find the index of the first result after the current selection
@@ -220,7 +219,7 @@ final class FindController: NSObject {
             }
         }
 
-        currentSearchOperation = operation
+        searchOperation = operation
         searchQueue.addOperation(operation)
     }
 
@@ -278,7 +277,6 @@ final class FindController: NSObject {
 }
 
 // MARK: - FindPanelDelegate
-@available(macOS 12, *)
 extension FindController: FindPanelDelegate {
     func findPanel(_ panel: FindPanel, didUpdateSearchQuery query: String, options: FindPanel.SearchOptions) {
         performSearch(query: query, options: options)
@@ -354,7 +352,6 @@ extension FindController: FindPanelDelegate {
 }
 
 // MARK: - NSWindowDelegate
-@available(macOS 12, *)
 extension FindController: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         clearSearchHighlights()

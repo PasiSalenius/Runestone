@@ -5,11 +5,6 @@ import AppKit
 extension TextView {
     /// Bridge NSTextFinder actions to custom find implementation
     @objc override public func performTextFinderAction(_ sender: Any?) {
-        guard #available(macOS 12, *) else {
-            super.performTextFinderAction(sender)
-            return
-        }
-
         guard let menuItem = sender as? NSMenuItem else {
             super.performTextFinderAction(sender)
             return
@@ -30,10 +25,8 @@ extension TextView {
         case .previousMatch:
             findPrevious(sender)
         case .replace, .replaceAndFind:
-            // Show find panel - replace functionality is available there
             showFindPanel(sender)
         case .replaceAll:
-            // Show find panel - replace all functionality is available there
             showFindPanel(sender)
         case .hideFindInterface:
             hideFindPanel(sender)
@@ -45,8 +38,6 @@ extension TextView {
     }
 }
 
-// MARK: - Find Panel (macOS 12+)
-@available(macOS 12, *)
 extension TextView {
     private var findController: FindController {
         FindController.shared

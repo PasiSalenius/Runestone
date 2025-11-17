@@ -2,7 +2,6 @@
 import AppKit
 
 /// Delegate protocol for find panel interactions
-@available(macOS 12, *)
 protocol FindPanelDelegate: AnyObject {
     func findPanel(_ panel: FindPanel, didUpdateSearchQuery query: String, options: FindPanel.SearchOptions)
     func findPanel(_ panel: FindPanel, didRequestFindNext: Bool)
@@ -11,7 +10,6 @@ protocol FindPanelDelegate: AnyObject {
 }
 
 /// A custom find panel for searching and replacing text in a TextView
-@available(macOS 12, *)
 final class FindPanel: NSView {
     struct SearchOptions {
         var isCaseSensitive: Bool = false
@@ -317,7 +315,6 @@ final class FindPanel: NSView {
 }
 
 // MARK: - NSSearchFieldDelegate
-@available(macOS 12, *)
 extension FindPanel: NSSearchFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {
         if obj.object as? NSTextField === searchField {

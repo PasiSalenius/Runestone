@@ -89,7 +89,6 @@ public final class DefaultTheme: Runestone.Theme {
         }
     }
 #elseif os(macOS)
-    @available(macOS 12, *)
     public func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
         if isSelected {
             let color = MultiPlatformColor(themeColorNamed: "search_match_highlighted")

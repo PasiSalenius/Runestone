@@ -500,9 +500,7 @@ open class TextView: NSView, NSMenuItemValidation {
             editorDelegate?.textViewDidBeginEditing(self)
         }
         // Notify find controller that this text view is now focused
-        if #available(macOS 12, *) {
-            notifyFindControllerDidBecomeFocused()
-        }
+        notifyFindControllerDidBecomeFocused()
         return true
     }
 
@@ -572,6 +570,7 @@ open class TextView: NSView, NSMenuItemValidation {
     /// - Parameter addUndoAction: Whether the state change can be undone. Defaults to false.
     public func setState(_ state: TextViewState, addUndoAction: Bool = false) {
         textViewController.setState(state, addUndoAction: addUndoAction)
+        refreshFindPanelSearch()
         // Layout to ensure the selection erctangles and caret as correctly placed.
         setNeedsLayout()
         layoutIfNeeded()
@@ -702,9 +701,9 @@ open class TextView: NSView, NSMenuItemValidation {
             return isEditable && undoManager?.canUndo ?? false
         } else if menuItem.action == #selector(redo(_:)) {
             return isEditable && undoManager?.canRedo ?? false
-        } else if #available(macOS 12, *), menuItem.action == #selector(showFindPanel(_:)) {
+        } else if menuItem.action == #selector(showFindPanel(_:)) {
             return true
-        } else if #available(macOS 12, *), menuItem.action == #selector(findNext(_:)) || menuItem.action == #selector(findPrevious(_:)) {
+        } else if menuItem.action == #selector(findNext(_:)) || menuItem.action == #selector(findPrevious(_:)) {
             // These are enabled if there are search results
             return true
         } else if menuItem.action == #selector(performTextFinderAction(_:)) {
@@ -847,12 +846,10 @@ private extension TextView {
         menu?.addItem(withTitle: L10n.Menu.ItemTitle.paste, action: #selector(paste(_:)), keyEquivalent: "v")
         menu?.addItem(.separator())
         menu?.addItem(withTitle: L10n.Menu.ItemTitle.selectAll, action: #selector(selectAll(_:)), keyEquivalent: "a")
-        if #available(macOS 12, *) {
-            menu?.addItem(.separator())
-            menu?.addItem(withTitle: "Find...", action: #selector(showFindPanel(_:)), keyEquivalent: "f")
-            menu?.addItem(withTitle: "Find Next", action: #selector(findNext(_:)), keyEquivalent: "g")
-            menu?.addItem(withTitle: "Find Previous", action: #selector(findPrevious(_:)), keyEquivalent: "G")
-        }
+        menu?.addItem(.separator())
+        menu?.addItem(withTitle: "Find...", action: #selector(showFindPanel(_:)), keyEquivalent: "f")
+        menu?.addItem(withTitle: "Find Next", action: #selector(findNext(_:)), keyEquivalent: "g")
+        menu?.addItem(withTitle: "Find Previous", action: #selector(findPrevious(_:)), keyEquivalent: "G")
     }
 }
 
@@ -861,6 +858,7 @@ extension TextView: TextViewControllerDelegate {
     func textViewControllerDidChangeText(_ textViewController: TextViewController) {
         caretView.delayBlinkIfNeeded()
         updateCaretFrame()
+        refreshFindPanelSearch()
         editorDelegate?.textViewDidChange(self)
     }
 
