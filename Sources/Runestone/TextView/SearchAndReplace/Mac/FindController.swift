@@ -240,23 +240,27 @@ final class FindController: NSObject {
     private func updateHighlights() {
         guard let textView else { return }
 
-        // Clear existing highlights
-        textView.highlightedRanges.removeAll()
+        guard !searchResults.isEmpty else {
+            textView.highlightedRanges.removeAll()
+            return
+        }
 
-        guard !searchResults.isEmpty else { return }
+        var highlightedRanges: [HighlightedRange] = []
 
         // Limit the number of visible highlights for performance
         // We still keep all results in searchResults for navigation and count display
         let highlightCount = min(searchResults.count, maxVisibleHighlights)
 
         // Add highlights for matches up to the limit
-        for index in 0..<highlightCount {
+        for index in 0 ..< highlightCount {
             let result = searchResults[index]
             let isSelected = index == searchResultIndex
             if let highlightedRange = textView.theme.highlightedRange(forFoundTextRange: result.range, isSelected: isSelected) {
-                textView.highlightedRanges.append(highlightedRange)
+                highlightedRanges.append(highlightedRange)
             }
         }
+        
+        textView.highlightedRanges = highlightedRanges
     }
 
     private func clearSearchHighlights() {

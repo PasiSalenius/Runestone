@@ -61,13 +61,13 @@ private extension LineFragmentRenderer {
             context.fillPath()
             // Draw non-rounded edges if needed.
             if !highlightedRange.containsStart {
-                let startRect = CGRect(x: 0, y: 0, width: cornerRadius, height: rect.height)
+                let startRect = CGRect(x: startX, y: 0, width: cornerRadius, height: rect.height)
                 let startPath = CGPath(rect: startRect, transform: nil)
                 context.addPath(startPath)
                 context.fillPath()
             }
             if !highlightedRange.containsEnd {
-                let endRect = CGRect(x: 0, y: 0, width: rect.width - cornerRadius, height: rect.height)
+                let endRect = CGRect(x: startX, y: 0, width: rect.width - cornerRadius, height: rect.height)
                 let endPath = CGPath(rect: endRect, transform: nil)
                 context.addPath(endPath)
                 context.fillPath()
