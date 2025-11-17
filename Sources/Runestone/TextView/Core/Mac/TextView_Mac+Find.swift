@@ -21,8 +21,10 @@ extension TextView {
         case .showReplaceInterface:
             showFindPanel(sender)
         case .nextMatch:
+            showFindPanel(sender)
             findNext(sender)
         case .previousMatch:
+            showFindPanel(sender)
             findPrevious(sender)
         case .replace, .replaceAndFind:
             showFindPanel(sender)
