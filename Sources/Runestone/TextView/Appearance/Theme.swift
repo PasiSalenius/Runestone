@@ -131,9 +131,9 @@ public extension Theme {
 #elseif os(macOS)
     func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
         if isSelected {
-            return HighlightedRange(range: foundTextRange, color: .systemYellow)
+            return HighlightedRange(range: foundTextRange, color: .systemYellow, cornerRadius: 2)
         } else {
-            return HighlightedRange(range: foundTextRange, color: .systemYellow.withAlphaComponent(0.2))
+            return HighlightedRange(range: foundTextRange, color: .systemYellow.withAlphaComponent(0.2), cornerRadius: 2)
         }
     }
 #endif

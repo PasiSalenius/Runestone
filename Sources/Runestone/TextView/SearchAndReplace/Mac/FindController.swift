@@ -34,7 +34,7 @@ final class FindController: NSObject {
     private var searchOperation: Operation?
 
     // Maximum number of highlights to display for performance
-    private let maxVisibleHighlights = 200
+    private let maxVisibleHighlights = 1000
 
     private override init() {
         let panel = FindPanel()

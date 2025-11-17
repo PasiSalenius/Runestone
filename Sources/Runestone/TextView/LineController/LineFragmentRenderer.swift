@@ -67,7 +67,7 @@ private extension LineFragmentRenderer {
                 context.fillPath()
             }
             if !highlightedRange.containsEnd {
-                let endRect = CGRect(x: startX, y: 0, width: rect.width - cornerRadius, height: rect.height)
+                let endRect = CGRect(x: endX - cornerRadius, y: 0, width: cornerRadius, height: rect.height)
                 let endPath = CGPath(rect: endRect, transform: nil)
                 context.addPath(endPath)
                 context.fillPath()
