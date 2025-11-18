@@ -25,7 +25,7 @@ final class FindPanel: NSView {
     private let replaceAllButton = NSButton()
     private let matchCountLabel = NSTextField(labelWithString: "")
 
-    private let searchAutosaveName = "searches"
+    private let searchAutosaveName = "findPanel"
     
     private let navigationControl = NSSegmentedControl()
 
@@ -319,6 +319,15 @@ extension FindPanel: NSSearchFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {
         if obj.object as? NSTextField === searchField {
             searchFieldDidChange(searchField)
+        }
+    }
+    
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if obj.object as? NSTextField === searchField {
+            let searchText = searchField.stringValue
+            if !searchText.isEmpty && searchField.recentSearches.first != searchText {
+                searchField.recentSearches.insert(searchText, at: 0)
+            }
         }
     }
 
