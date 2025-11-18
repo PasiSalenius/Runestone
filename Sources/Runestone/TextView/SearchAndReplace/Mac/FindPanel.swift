@@ -29,7 +29,7 @@ final class FindPanel: NSView {
     
     private let navigationControl = NSSegmentedControl()
 
-    private let ignoreCaseCheckbox = NSButton(checkboxWithTitle: "Ignore Case", target: nil, action: nil)
+    private let ignoreCaseCheckbox = NSButton(checkboxWithTitle: "Ignore case", target: nil, action: nil)
     private let searchModeLabel = NSTextField()
     private let searchModePopup = NSPopUpButton()
 
