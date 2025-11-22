@@ -1,3 +1,4 @@
+#if os(iOS)
 import UIKit
 
 /// Syntax highlights a string.
@@ -103,3 +104,4 @@ private extension StringSyntaxHighlighter {
         return mutableParagraphStyle
     }
 }
+#endif
