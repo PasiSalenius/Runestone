@@ -16,7 +16,7 @@ open class TextView: UIScrollView {
     @objc public weak var inputDelegate: UITextInputDelegate?
     /// Returns a Boolean value indicating whether this object can become the first responder.
     override public var canBecomeFirstResponder: Bool {
-        !isFirstResponder && isEditable
+        true
     }
     /// Delegate to receive callbacks for events triggered by the editor.
     public weak var editorDelegate: TextViewDelegate?
@@ -432,12 +432,6 @@ open class TextView: UIScrollView {
             textViewController.horizontalOverscrollFactor = newValue
         }
     }
-    /// The length of the line that was longest when opening the document.
-    ///
-    /// This will return nil if the line is no longer available. The value will not be kept updated as the text is changed. The value can be used to determine if a document contains a very long line in which case the performance may be degraded when editing the line.
-    public var lengthOfInitallyLongestLine: Int? {
-        textViewController.lengthOfInitallyLongestLine
-    }
     /// Ranges in the text to be highlighted. The color defined by the background will be drawen behind the text.
     public var highlightedRanges: [HighlightedRange] {
         get {
@@ -620,9 +614,6 @@ open class TextView: UIScrollView {
     /// Asks UIKit to make this object the first responder in its window.
     @discardableResult
     override open func becomeFirstResponder() -> Bool {
-        guard !isEditing && shouldBeginEditing else {
-            return false
-        }
         if canBecomeFirstResponder {
             willBeginEditing()
         }
@@ -1036,6 +1027,12 @@ extension TextView {
             if !self.viewHierarchyContainsCaret && self.editableTextInteraction.view != nil {
                 self.removeInteraction(self.editableTextInteraction)
                 self.addInteraction(self.editableTextInteraction)
+                #if compiler(>=5.9)
+                if #available(iOS 17, *) {
+                    self.sbs_textSelectionDisplayInteraction?.isActivated = true
+                    self.sbs_textSelectionDisplayInteraction?.sbs_enableCursorBlinks()
+                }
+                #endif
             }
         }
     }
@@ -1097,6 +1094,12 @@ private extension TextView {
             isInputAccessoryViewEnabled = true
             removeInteraction(nonEditableTextInteraction)
             addInteraction(editableTextInteraction)
+            #if compiler(>=5.9)
+            if #available(iOS 17, *) {
+                // Workaround a bug where the caret does not appear until the user taps again on iOS 17 (FB12622609).
+                sbs_textSelectionDisplayInteraction?.isActivated = true
+            }
+            #endif
         }
     }
 

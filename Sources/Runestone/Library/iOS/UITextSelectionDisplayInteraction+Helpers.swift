@@ -1,6 +1,5 @@
+#if os(iOS)
 import UIKit
-
-#if compiler(>=5.9)
 
 @available(iOS 17, *)
 extension UITextSelectionDisplayInteraction {
@@ -8,5 +7,4 @@ extension UITextSelectionDisplayInteraction {
         setValue(true, forKey: "rosruc".reversed() + "Blinks")
     }
 }
-
 #endif
