@@ -1,9 +1,13 @@
-import Foundation
+#if os(macOS)
+import AppKit
+#endif
+#if os(iOS)
 import UIKit
+#endif
 
 struct DefaultStringAttributes {
-    let textColor: UIColor
-    let font: UIFont
+    let textColor: MultiPlatformColor
+    let font: MultiPlatformFont
     let kern: CGFloat
     let tabWidth: CGFloat
 
