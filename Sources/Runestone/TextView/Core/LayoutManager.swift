@@ -117,6 +117,18 @@ final class LayoutManager {
     private let lineNumbersContainerView = FlippedView()
 
     // MARK: - Sizing
+    private var leadingLineSpacing: CGFloat {
+        #if os(iOS)
+        if showLineNumbers {
+            return gutterWidthService.gutterWidth + textContainerInset.left
+        } else {
+            return textContainerInset.left
+        }
+        #endif
+        #if os(macOS)
+        return 0
+        #endif
+    }
     private var insetViewport: CGRect {
         let x = viewport.minX - textContainerInset.left
         let y = viewport.minY - textContainerInset.top
@@ -247,7 +259,7 @@ extension LayoutManager {
     }
 
     func closestIndex(to point: CGPoint) -> Int {
-        let adjustedXPosition = point.x
+        let adjustedXPosition = point.x - leadingLineSpacing
         let adjustedYPosition = point.y - textContainerInset.top
         let adjustedPoint = CGPoint(x: adjustedXPosition, y: adjustedYPosition)
         if let line = lineManager.line(containingYOffset: adjustedPoint.y), let lineController = lineControllerStorage[line.id] {
