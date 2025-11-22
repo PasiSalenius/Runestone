@@ -36,6 +36,7 @@ final class RedBlackTree<NodeID: RedBlackTreeNodeID, NodeValue: RedBlackTreeNode
     func node(containingLocation location: NodeValue) -> Node? {
         guard location >= minimumValue && location <= root.nodeTotalValue else {
             #if DEBUG
+            return nil
             fatalError("\(location) is out of bounds. Valid range is \(minimumValue) - \(root.nodeTotalValue)."
                        + " This issue is under investigation. Please open an issue at https://github.com/simonbs/Runestone/issues"
                        + " and include this stack trace and a sample text file if possible. This fatal error is only thrown in debug builds.")

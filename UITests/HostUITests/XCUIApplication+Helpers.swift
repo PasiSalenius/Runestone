@@ -1,13 +1,12 @@
 import XCTest
 
 private enum EnvironmentKey {
-    static let disableTextPersistance = "disableTextPersistance"
     static let crlfLineEndings = "crlfLineEndings"
 }
 
 extension XCUIApplication {
     var textView: XCUIElement? {
-        scrollViews.children(matching: .textView).element
+        textViews["RunestoneTextView"]
     }
 
     func disablingTextPersistance() -> Self {

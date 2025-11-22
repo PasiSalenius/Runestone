@@ -1,10 +1,10 @@
 import Foundation
-import UIKit
 
 protocol HighlightNavigationControllerDelegate: AnyObject {
     func highlightNavigationController(
         _ controller: HighlightNavigationController,
-        shouldNavigateTo highlightNavigationRange: HighlightNavigationRange)
+        shouldNavigateTo highlightNavigationRange: HighlightNavigationRange
+    )
 }
 
 struct HighlightNavigationRange {

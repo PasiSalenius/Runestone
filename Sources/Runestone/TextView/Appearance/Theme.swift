@@ -1,48 +1,52 @@
+#if os(macOS)
+import AppKit
+#endif
+import CoreGraphics
+#if os(iOS)
 import UIKit
+#endif
 
 /// Fonts and colors to be used by a `TextView`.
 public protocol Theme: AnyObject {
     /// Default font of text in the text view.
-    var font: UIFont { get }
+    var font: MultiPlatformFont { get }
     /// Default color of text in the text view.
-    var textColor: UIColor { get }
+    var textColor: MultiPlatformColor { get }
     /// Background color of the gutter containing line numbers.
-    var gutterBackgroundColor: UIColor { get }
+    var gutterBackgroundColor: MultiPlatformColor { get }
     /// Color of the hairline next to the gutter containing line numbers.
-    var gutterHairlineColor: UIColor { get }
+    var gutterHairlineColor: MultiPlatformColor { get }
     /// Width of the hairline next to the gutter containing line numbers.
     var gutterHairlineWidth: CGFloat { get }
     /// Color of the line numbers in the gutter.
-    var lineNumberColor: UIColor { get }
+    var lineNumberColor: MultiPlatformColor { get }
     /// Font of the line nubmers in the gutter.
-    var lineNumberFont: UIFont { get }
+    var lineNumberFont: MultiPlatformFont { get }
     /// Background color of the selected line.
-    var selectedLineBackgroundColor: UIColor { get }
+    var selectedLineBackgroundColor: MultiPlatformColor { get }
     /// Color of the line number of the selected line.
-    var selectedLinesLineNumberColor: UIColor { get }
+    var selectedLinesLineNumberColor: MultiPlatformColor { get }
     /// Background color of the gutter for selected lines.
-    var selectedLinesGutterBackgroundColor: UIColor { get }
+    var selectedLinesGutterBackgroundColor: MultiPlatformColor { get }
     /// Color of invisible characters, i.e. dots, spaces and line breaks.
-    var invisibleCharactersColor: UIColor { get }
+    var invisibleCharactersColor: MultiPlatformColor { get }
     /// Color of the hairline next to the page guide.
-    var pageGuideHairlineColor: UIColor { get }
-    /// Width of the hairline next to the page guide.
-    var pageGuideHairlineWidth: CGFloat { get }
+    var pageGuideHairlineColor: MultiPlatformColor { get }
     /// Background color of the page guide.
-    var pageGuideBackgroundColor: UIColor { get }
+    var pageGuideBackgroundColor: MultiPlatformColor { get }
     /// Background color of marked text. Text will be marked when writing certain languages, for example Chinese and Japanese.
-    var markedTextBackgroundColor: UIColor { get }
+    var markedTextBackgroundColor: MultiPlatformColor { get }
     /// Corner radius of the background of marked text. Text will be marked when writing certain languages, for example Chinese and Japanese.
     /// A value of zero or less means that the background will not have rounded corners. Defaults to 0.
     var markedTextBackgroundCornerRadius: CGFloat { get }
     /// Color of text matching the capture sequence.
     ///
     /// See <doc:CreatingATheme> for more information on higlight names.
-    func textColor(for highlightName: String) -> UIColor?
+    func textColor(for highlightName: String) -> MultiPlatformColor?
     /// Font of text matching the capture sequence.
     ///
     /// See <doc:CreatingATheme> for more information on higlight names.
-    func font(for highlightName: String) -> UIFont?
+    func font(for highlightName: String) -> MultiPlatformFont?
     /// Traits of text matching the capture sequence.
     ///
     /// See <doc:CreatingATheme> for more information on higlight names.
@@ -51,6 +55,7 @@ public protocol Theme: AnyObject {
     ///
     /// See <doc:CreatingATheme> for more information on higlight names.
     func shadow(for highlightName: String) -> NSShadow?
+#if os(iOS)
     /// Highlighted range for a text range matching a search query.
     ///
     /// This function is called when highlighting a search result that was found using the standard find/replace interaction enabled using <doc:TextView/isFindInteractionEnabled>.
@@ -62,22 +67,42 @@ public protocol Theme: AnyObject {
     /// - Returns: The object used for highlighting the provided text range, or `nil` if the range should not be highlighted.
     @available(iOS 16, *)
     func highlightedRange(forFoundTextRange foundTextRange: NSRange, ofStyle style: UITextSearchFoundTextStyle) -> HighlightedRange?
+#elseif os(macOS)
+    /// Highlighted range for a text range matching a search query.
+    ///
+    /// This function is called when highlighting a search result.
+    ///
+    /// Return `nil` to prevent highlighting the range.
+    /// - Parameters:
+    ///   - foundTextRange: The text range matching a search query.
+    ///   - isSelected: Whether this is the currently selected match (true) or just a found match (false).
+    /// - Returns: The object used for highlighting the provided text range, or `nil` if the range should not be highlighted.
+    func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange?
+#endif
 }
 
 public extension Theme {
     var gutterHairlineWidth: CGFloat {
-        hairlineLength
+        #if os(iOS)
+        return 1 / UIScreen.main.scale
+        #else
+        return 1 / NSScreen.main!.backingScaleFactor
+        #endif
     }
 
     var pageGuideHairlineWidth: CGFloat {
-        hairlineLength
+        #if os(iOS)
+        return 1 / UIScreen.main.scale
+        #else
+        return 1 / NSScreen.main!.backingScaleFactor
+        #endif
     }
 
     var markedTextBackgroundCornerRadius: CGFloat {
         0
     }
 
-    func font(for highlightName: String) -> UIFont? {
+    func font(for highlightName: String) -> MultiPlatformFont? {
         nil
     }
 
@@ -89,6 +114,7 @@ public extension Theme {
         nil
     }
 
+#if os(iOS)
     @available(iOS 16, *)
     func highlightedRange(forFoundTextRange foundTextRange: NSRange, ofStyle style: UITextSearchFoundTextStyle) -> HighlightedRange? {
         switch style {
@@ -102,4 +128,13 @@ public extension Theme {
             return nil
         }
     }
+#elseif os(macOS)
+    func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
+        if isSelected {
+            return HighlightedRange(range: foundTextRange, color: .systemYellow, cornerRadius: 2)
+        } else {
+            return HighlightedRange(range: foundTextRange, color: .systemYellow.withAlphaComponent(0.2), cornerRadius: 2)
+        }
+    }
+#endif
 }

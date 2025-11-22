@@ -4,8 +4,21 @@
 
 ### Initialing the Text View
 
+- ``init()``
 - ``init(frame:)``
 - ``init(coder:)``
+
+### Lifecycle
+
+- ``isFlipped``
+- ``didMoveToWindow()``
+- ``layout()``
+- ``layoutSubviews()``
+- ``safeAreaInsetsDidChange()``
+- ``traitCollectionDidChange(_:)``
+- ``viewDidMoveToWindow()``
+- ``resizeSubviews(withOldSize:)``
+- ``resetCursorRects()``
 
 ### Responding to Text View Changes
 
@@ -15,7 +28,6 @@
 ### Configuring the Appearance
 
 - ``theme``
-- ``backgroundColor``
 - ``kern``
 - ``lineHeightMultiplier``
 - ``insertionPointColor``
@@ -63,6 +75,7 @@
 - ``gutterLeadingPadding``
 - ``gutterTrailingPadding``
 - ``gutterWidth``
+- ``gutterMinimumCharacterCount``
 
 ### Character Pairs
 
@@ -110,6 +123,7 @@
 - ``selectNextHighlightedRange()``
 - ``selectPreviousHighlightedRange()``
 - ``selectHighlightedRange(at:)``
+- ``showMenuAfterNavigatingToHighlightedRange``
 
 ### Supporting Find and Replace
 
@@ -131,14 +145,19 @@
 - ``smartDashesType``
 - ``smartInsertDeleteType``
 - ``smartQuotesType``
-- ``text(in:)-3lp4v``
-- ``text(in:)-3wzco``
+- ``text(in:)``
 - ``insertText(_:)``
+- ``insertText(_:replacementRange:)``
+- ``insertNewline(_:)``
+- ``insertTab(_:)``
 - ``replaceText(in:)``
 - ``replace(_:withText:)-7gret``
-- ``replace(_:withText:)-7ugo8``
+- ``deleteForward(_:)``
 - ``deleteBackward()``
+- ``deleteBackward(_:)``
 - ``undoManager``
+- ``undo(_:)``
+- ``redo(_:)``
 
 ### Managing the Keyboard
 
@@ -146,12 +165,11 @@
 - ``keyboardType``
 - ``returnKeyType``
 - ``inputAccessoryView``
-- ``inputAssistantItem``
-- ``reloadInputViews()``
 
 ### Selecting Text
 
 - ``selectedRange``
+- ``selectedRange()``
 - ``selectedTextRange``
 - ``selectionBarColor``
 - ``selectionHighlightColor``
@@ -161,34 +179,77 @@
 - ``contentOffset``
 - ``isAutomaticScrollEnabled``
 
-### Laying Out Subviews
+### Keyboard Events
 
-- ``layoutSubviews()``
-- ``safeAreaInsetsDidChange()``
+- ``keyDown(with:)``
+
+### Keyboard Navigation
+
+- ``moveBackward(_:)``
+- ``moveBackwardAndModifySelection(_:)``
+- ``moveDown(_:)``
+- ``moveDownAndModifySelection(_:)``
+- ``moveForward(_:)``
+- ``moveForwardAndModifySelection(_:)``
+- ``moveLeft(_:)``
+- ``moveLeftAndModifySelection(_:)``
+- ``moveRight(_:)``
+- ``moveRightAndModifySelection(_:)``
+- ``moveToBeginningOfDocument(_:)``
+- ``moveToBeginningOfDocumentAndModifySelection(_:)``
+- ``moveToBeginningOfLineAndModifySelection(_:)``
+- ``moveToBeginningOfLine(_:)``
+- ``moveToBeginningOfLineAndModifySelection(_:)``
+- ``moveToBeginningOfParagraph(_:)``
+- ``moveToBeginningOfParagraphAndModifySelection(_:)``
+- ``moveToEndOfDocument(_:)``
+- ``moveToEndOfDocumentAndModifySelection(_:)``
+- ``moveToEndOfLine(_:)``
+- ``moveToEndOfLineAndModifySelection(_:)``
+- ``moveToEndOfParagraph(_:)``
+- ``moveToEndOfParagraphAndModifySelection(_:)``
+- ``moveUp(_:)``
+- ``moveUpAndModifySelection(_:)``
+- ``moveWordBackward(_:)``
+- ``moveWordBackwardAndModifySelection(_:)``
+- ``moveWordForward(_:)``
+- ``moveWordForwardAndModifySelection(_:)``
+- ``moveWordLeft(_:)``
+- ``moveWordLeftAndModifySelection(_:)``
+- ``moveWordRight(_:)``
+- ``moveWordRightAndModifySelection(_:)``
+
+### Mouse Events
+
+- ``mouseDown(with:)``
+- ``mouseDragged(with:)``
+- ``mouseUp(with:)``
+- ``rightMouseDown(with:)``
+
+### Interactions
+
+- ``hitTest(_:with:)``
+- ``pressesEnded(_:with:)``
+
+### Commands
+
+- ``cut(_:)``
+- ``copy(_:)``
+- ``paste(_:)``
+- ``selectAll(_:)``
+- ``replace(_:withText:)-7cbas``
+- ``canPerformAction(_:withSender:)``
+- ``deleteWordForward(_:)``
+- ``deleteWordBackward(_:)``
 
 ### Responder Chain
 
 - ``canBecomeFirstResponder``
+- ``acceptsFirstResponder``
 - ``becomeFirstResponder()``
 - ``resignFirstResponder()``
+- ``validateMenuItem(_:)``
 
-### UITextInput Conformace
+### Text Input Conformance
 
-- ``hasText``
-- ``beginningOfDocument``
-- ``endOfDocument``
-- ``markedTextRange``
-- ``tokenizer``
-- ``textRange(from:to:)``
-- ``position(from:offset:)``
-- ``position(from:in:offset:)``
-- ``position(within:farthestIn:)``
-- ``closestPosition(to:)``
-- ``closestPosition(to:within:)``
-- ``compare(_:to:)``
-- ``offset(from:to:)``
-- ``characterRange(at:)``
-- ``characterRange(byExtending:in:)``
-- ``caretRect(for:)``
-- ``firstRect(for:)``
-- ``selectionRects(for:)``
+- ``inputDelegate``

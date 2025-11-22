@@ -1,19 +1,40 @@
 import Combine
-import UIKit
+import Foundation
 
 final class ContentSizeService {
-    var safeAreaInset: UIEdgeInsets = .zero
-    var textContainerInset: UIEdgeInsets = .zero
-    var scrollViewWidth: CGFloat = 0 {
+    var safeAreaInset: MultiPlatformEdgeInsets = .zero
+    var scrollViewSize: CGSize = .zero {
         didSet {
-            if scrollViewWidth != oldValue && isLineWrappingEnabled {
+            if scrollViewSize != oldValue && isLineWrappingEnabled {
                 invalidateContentSize()
             }
         }
     }
+    var verticalScrollerWidth: CGFloat = 0 {
+        didSet {
+            if verticalScrollerWidth != oldValue {
+                invalidateContentSize()
+            }
+        }
+    }
+    var textContainerInset: MultiPlatformEdgeInsets = .zero
     var isLineWrappingEnabled = true {
         didSet {
             if isLineWrappingEnabled != oldValue {
+                invalidateContentSize()
+            }
+        }
+    }
+    var horizontalOverscrollFactor: CGFloat = 0 {
+        didSet {
+            if horizontalOverscrollFactor != oldValue && !isLineWrappingEnabled {
+                invalidateContentSize()
+            }
+        }
+    }
+    var verticalOverscrollFactor: CGFloat = 0 {
+        didSet {
+            if verticalOverscrollFactor != oldValue {
                 invalidateContentSize()
             }
         }
@@ -29,11 +50,11 @@ final class ContentSizeService {
         }
     }
     var contentWidth: CGFloat {
-        let minimumWidth = scrollViewWidth - safeAreaInset.left - safeAreaInset.right
+        let minimumWidth = scrollViewSize.width - safeAreaInset.left - safeAreaInset.right - verticalScrollerWidth
         if isLineWrappingEnabled {
             return minimumWidth
         } else {
-            let textContentWidth = longestLineWidth ?? scrollViewWidth
+            let textContentWidth = longestLineWidth ?? scrollViewSize.width
             let preferredWidth = ceil(
                 textContentWidth
                 + gutterWidthService.gutterWidth
@@ -48,7 +69,11 @@ final class ContentSizeService {
         ceil(totalLinesHeight + textContainerInset.top + textContainerInset.bottom)
     }
     var contentSize: CGSize {
-        CGSize(width: contentWidth, height: contentHeight)
+        let horizontalOverscrollLength = max(scrollViewSize.width * horizontalOverscrollFactor, 0)
+        let verticalOverscrollLength = max(scrollViewSize.height * verticalOverscrollFactor, 0)
+        let width = contentWidth + (isLineWrappingEnabled ? 0 : horizontalOverscrollLength)
+        let height = contentHeight + verticalOverscrollLength
+        return CGSize(width: width, height: height)
     }
     @Published private(set) var isContentSizeInvalid = false
 
@@ -114,10 +139,12 @@ final class ContentSizeService {
         }
     }
 
-    init(lineManager: LineManager,
-         lineControllerStorage: LineControllerStorage,
-         gutterWidthService: GutterWidthService,
-         invisibleCharacterConfiguration: InvisibleCharacterConfiguration) {
+    init(
+        lineManager: LineManager,
+        lineControllerStorage: LineControllerStorage,
+        gutterWidthService: GutterWidthService,
+        invisibleCharacterConfiguration: InvisibleCharacterConfiguration
+    ) {
         self.lineManager = lineManager
         self.lineControllerStorage = lineControllerStorage
         self.gutterWidthService = gutterWidthService
@@ -146,28 +173,35 @@ final class ContentSizeService {
                 if line.id == lineIDTrackingWidth || lineWidth > maximumLineWidth {
                     self.lineIDTrackingWidth = line.id
                     _longestLineWidth = nil
+                    isContentSizeInvalid = true
                 }
             } else if !isLineWrappingEnabled {
                 _longestLineWidth = nil
+                isContentSizeInvalid = true
             }
         }
         let didUpdateHeight = lineManager.setHeight(of: line, to: newSize.height)
         if didUpdateHeight {
             _totalLinesHeight = nil
+            isContentSizeInvalid = true
         }
     }
 }
 
 private extension ContentSizeService {
     private func storeWidthOfInitiallyLongestLine() {
-        if let longestLine = lineManager.initialLongestLine {
-            lineIDTrackingWidth = longestLine.id
-            let lineController = lineControllerStorage.getOrCreateLineController(for: longestLine)
-            lineController.invalidateEverything()
-            lineWidths[longestLine.id] = lineController.lineWidth
-            if !isLineWrappingEnabled {
-                _longestLineWidth = nil
-            }
+        guard let longestLine = lineManager.initialLongestLine else {
+            return
+        }
+        lineIDTrackingWidth = longestLine.id
+        let lineController = lineControllerStorage.getOrCreateLineController(for: longestLine)
+        lineController.invalidateString()
+        lineController.invalidateTypesetting()
+        lineController.invalidateSyntaxHighlighting()
+        lineWidths[longestLine.id] = lineController.lineWidth
+        if !isLineWrappingEnabled {
+            _longestLineWidth = nil
+            isContentSizeInvalid = true
         }
     }
 }

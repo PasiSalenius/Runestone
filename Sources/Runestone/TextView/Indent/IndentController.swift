@@ -1,5 +1,7 @@
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 protocol IndentControllerDelegate: AnyObject {
     func indentController(_ controller: IndentController, shouldInsert text: String, in range: NSRange)
@@ -8,11 +10,15 @@ protocol IndentControllerDelegate: AnyObject {
 }
 
 final class IndentController {
+    #if os(macOS)
+    private typealias NSStringDrawingOptions = NSString.DrawingOptions
+    #endif
+
     weak var delegate: IndentControllerDelegate?
     var stringView: StringView
     var lineManager: LineManager
     var languageMode: InternalLanguageMode
-    var indentFont: UIFont {
+    var indentFont: MultiPlatformFont {
         didSet {
             if indentFont != oldValue {
                 _tabWidth = nil
@@ -41,7 +47,13 @@ final class IndentController {
 
     private var _tabWidth: CGFloat?
 
-    init(stringView: StringView, lineManager: LineManager, languageMode: InternalLanguageMode, indentStrategy: IndentStrategy, indentFont: UIFont) {
+    init(
+        stringView: StringView,
+        lineManager: LineManager,
+        languageMode: InternalLanguageMode,
+        indentStrategy: IndentStrategy,
+        indentFont: MultiPlatformFont
+    ) {
         self.stringView = stringView
         self.lineManager = lineManager
         self.languageMode = languageMode
@@ -111,8 +123,7 @@ final class IndentController {
         }
     }
 
-    func insertLineBreak(in range: NSRange, using lineEnding: LineEnding) {
-        let symbol = lineEnding.symbol
+    func insertLineBreak(in range: NSRange, using symbol: String) {
         if let startLinePosition = lineManager.linePosition(at: range.lowerBound),
             let endLinePosition = lineManager.linePosition(at: range.upperBound) {
             let strategy = languageMode.strategyForInsertingLineBreak(from: startLinePosition, to: endLinePosition, using: indentStrategy)

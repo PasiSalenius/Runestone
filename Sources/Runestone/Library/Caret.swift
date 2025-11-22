@@ -1,9 +1,13 @@
-import UIKit
+import CoreGraphics
 
 enum Caret {
+    #if os(iOS)
     static let width: CGFloat = 2
+    #else
+    static let width: CGFloat = 2
+    #endif
 
-    static func defaultHeight(for font: UIFont?) -> CGFloat {
+    static func defaultHeight(for font: MultiPlatformFont?) -> CGFloat {
         font?.lineHeight ?? 15
     }
 }

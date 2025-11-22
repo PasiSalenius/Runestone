@@ -1,5 +1,5 @@
 import CoreText
-import UIKit
+import Foundation
 
 protocol LineFragmentRendererDelegate: AnyObject {
     func string(in lineFragmentRenderer: LineFragmentRenderer) -> String?
@@ -15,7 +15,7 @@ final class LineFragmentRenderer {
     var lineFragment: LineFragment
     let invisibleCharacterConfiguration: InvisibleCharacterConfiguration
     var markedRange: NSRange?
-    var markedTextBackgroundColor: UIColor = .systemFill
+    var markedTextBackgroundColor: MultiPlatformColor = .systemFill
     var markedTextBackgroundCornerRadius: CGFloat = 0
     var highlightedRangeFragments: [HighlightedRangeFragment] = []
 
@@ -53,16 +53,24 @@ private extension LineFragmentRenderer {
             } else {
                 endX = CTLineGetOffsetForStringIndex(lineFragment.line, highlightedRange.range.upperBound, nil)
             }
+            let cornerRadius = highlightedRange.cornerRadius
             let rect = CGRect(x: startX, y: 0, width: endX - startX, height: lineFragment.scaledSize.height)
-            let roundedCorners = highlightedRange.roundedCorners
+            let roundedPath = CGPath(roundedRect: rect, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
             context.setFillColor(highlightedRange.color.cgColor)
-            if !roundedCorners.isEmpty && highlightedRange.cornerRadius > 0 {
-                let cornerRadii = CGSize(width: highlightedRange.cornerRadius, height: highlightedRange.cornerRadius)
-                let bezierPath = UIBezierPath(roundedRect: rect, byRoundingCorners: roundedCorners, cornerRadii: cornerRadii)
-                context.addPath(bezierPath.cgPath)
+            context.addPath(roundedPath)
+            context.fillPath()
+            // Draw non-rounded edges if needed.
+            if !highlightedRange.containsStart {
+                let startRect = CGRect(x: startX, y: 0, width: cornerRadius, height: rect.height)
+                let startPath = CGPath(rect: startRect, transform: nil)
+                context.addPath(startPath)
                 context.fillPath()
-            } else {
-                context.fill(rect)
+            }
+            if !highlightedRange.containsEnd {
+                let endRect = CGRect(x: endX - cornerRadius, y: 0, width: cornerRadius, height: rect.height)
+                let endPath = CGPath(rect: endRect, transform: nil)
+                context.addPath(endPath)
+                context.fillPath()
             }
         }
         context.restoreGState()

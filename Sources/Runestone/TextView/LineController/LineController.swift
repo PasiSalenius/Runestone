@@ -1,13 +1,19 @@
 // swiftlint:disable file_length
+#if os(macOS)
+import AppKit
+#endif
 import CoreGraphics
 import CoreText
+import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 typealias LineFragmentTree = RedBlackTree<LineFragmentNodeID, Int, LineFragmentNodeData>
 
 protocol LineControllerDelegate: AnyObject {
     func lineSyntaxHighlighter(for lineController: LineController) -> LineSyntaxHighlighter?
-    func lineControllerDidInvalidateLineWidthDuringAsyncSyntaxHighlight(_ lineController: LineController)
+    func lineControllerDidInvalidateSize(_ lineController: LineController)
 }
 
 final class LineController {
@@ -134,24 +140,23 @@ final class LineController {
         syntaxHighlighter?.cancel()
     }
 
-    func invalidateEverything() {
-        isLineFragmentCacheInvalid = true
+    func invalidateString() {
         isStringInvalid = true
+    }
+
+    func invalidateTypesetting() {
+        isLineFragmentCacheInvalid = true
         isTypesetterInvalid = true
+        _lineHeight = nil
+    }
+
+    func invalidateSyntaxHighlighting() {
         isDefaultAttributesInvalid = true
         isSyntaxHighlightingInvalid = true
-        _lineHeight = nil
     }
 
     func invalidateSyntaxHighlighter() {
         cachedSyntaxHighlighter = nil
-    }
-
-    func invalidateSyntaxHighlighting() {
-        isTypesetterInvalid = true
-        isDefaultAttributesInvalid = true
-        isSyntaxHighlightingInvalid = true
-        _lineHeight = nil
     }
 
     func lineFragmentControllers(in rect: CGRect) -> [LineFragmentController] {
@@ -283,13 +288,9 @@ private extension LineController {
         if async {
             syntaxHighlighter.syntaxHighlight(input) { [weak self] result in
                 if case .success = result, let self = self {
-                    let oldWidth = self.lineWidth
                     self.isSyntaxHighlightingInvalid = false
                     self.isTypesetterInvalid = true
                     self.redisplayLineFragments()
-                    if abs(self.lineWidth - oldWidth) > CGFloat.ulpOfOne {
-                        self.delegate?.lineControllerDidInvalidateLineWidthDuringAsyncSyntaxHighlight(self)
-                    }
                 }
             }
         } else {
@@ -364,6 +365,7 @@ private extension LineController {
         updateLineHeight(for: newLineFragments)
         reapplyLineFragmentToLineFragmentControllers()
         setNeedsDisplayOnLineFragmentViews()
+        delegate?.lineControllerDidInvalidateSize(self)
     }
 
     private func reapplyLineFragmentToLineFragmentControllers() {

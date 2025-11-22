@@ -1,4 +1,6 @@
+#if os(iOS)
 import UIKit
+#endif
 
 protocol ReusableView {
     func prepareForReuse()
@@ -8,21 +10,26 @@ extension ReusableView {
     func prepareForReuse() {}
 }
 
-final class ViewReuseQueue<Key: Hashable, View: UIView & ReusableView> {
+final class ViewReuseQueue<Key: Hashable, View: MultiPlatformView & ReusableView> {
     private(set) var visibleViews: [Key: View] = [:]
 
     private var queuedViews: Set<View> = []
 
     init() {
+        #if os(iOS)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(clearMemory),
             name: UIApplication.didReceiveMemoryWarningNotification,
-            object: nil)
+            object: nil
+        )
+        #endif
     }
 
     deinit {
+        #if os(iOS)
         NotificationCenter.default.removeObserver(self)
+        #endif
     }
 
     func enqueueViews(withKeys keys: Set<Key>) {
@@ -58,7 +65,9 @@ final class ViewReuseQueue<Key: Hashable, View: UIView & ReusableView> {
         }
     }
 
+    #if os(iOS)
     @objc private func clearMemory() {
         queuedViews.removeAll()
     }
+    #endif
 }
