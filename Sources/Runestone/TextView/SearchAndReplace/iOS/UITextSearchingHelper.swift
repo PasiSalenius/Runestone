@@ -197,3 +197,4 @@ private extension SearchQuery.MatchMethod {
         }
     }
 }
+#endif
