@@ -107,7 +107,7 @@ private extension TextViewController {
     }
 
     private func delegateAllowsChangeText(in range: NSRange, withReplacementText replacementText: String) -> Bool {
-        textView.editorDelegate?.textView(textView, shouldChangeTextIn: range, replacementText: text) ?? true
+        textView.editorDelegate?.textView(textView, shouldChangeTextIn: range, replacementText: replacementText) ?? true
     }
 
     private func insertLeadingComponent(of characterPair: CharacterPair, in range: NSRange) -> Bool {
