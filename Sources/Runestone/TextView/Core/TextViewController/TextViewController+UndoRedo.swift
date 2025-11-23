@@ -14,7 +14,9 @@ extension TextViewController {
             #if os(iOS)
             textViewController.textView.inputDelegate?.selectionWillChange(textViewController.textView)
             #endif
-            textViewController.replaceText(in: range, with: text)
+            if textViewController.textView.editorDelegate?.textView(textViewController.textView, shouldChangeTextIn: range, replacementText: text) ?? true {
+                textViewController.replaceText(in: range, with: text)
+            }
             textViewController.selectedRange = oldSelectedRange
             #if os(iOS)
             textViewController.textView.inputDelegate?.selectionDidChange(textViewController.textView)
