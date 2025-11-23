@@ -137,8 +137,9 @@ private extension LineFragmentRenderer {
             guard let textColor = fragment.textColor else { continue }
 
             // Convert from line-local coordinates to attributed-string-local coordinates
-            // fragment.range is in line-local coords, but attributedString uses visibleRange-local coords
-            let fragmentLocalRange = fragment.range.local(to: lineFragment.visibleRange)
+            let fragmentLocalRange = fragment.range
+                .capped(to: lineFragment.visibleRange)
+                .local(to: lineFragment.visibleRange)
 
             // Add foreground color attribute for this range
             mutableAttributedString.addAttribute(
