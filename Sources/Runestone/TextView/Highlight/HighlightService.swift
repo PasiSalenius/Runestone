@@ -14,7 +14,7 @@ final class HighlightService {
         }
         set {
             // For backward compatibility: setting highlightedRanges directly puts everything in .custom("") category
-            highlightedRangesByCategory = [.custom(""): newValue]
+            highlightedRangesByCategory[.custom("")] = newValue
             updateMergedRanges()
         }
     }
