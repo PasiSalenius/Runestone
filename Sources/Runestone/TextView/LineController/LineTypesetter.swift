@@ -232,11 +232,19 @@ private extension LineTypesetter {
         let scaledSize = CGSize(width: width, height: height * lineFragmentHeightMultiplier)
         let id = LineFragmentID(lineId: lineID, lineFragmentIndex: lineFragmentIndex)
         let visibleRange = NSRange(location: visibleRange.location, length: visibleRange.length)
+        // Extract attributed string substring for this line fragment
+        let fragmentAttributedString: NSAttributedString
+        if let attributedString, visibleRange.location + visibleRange.length <= attributedString.length {
+            fragmentAttributedString = attributedString.attributedSubstring(from: visibleRange)
+        } else {
+            fragmentAttributedString = NSAttributedString()
+        }
         return LineFragment(
             id: id,
             index: lineFragmentIndex,
             visibleRange: visibleRange,
             line: line,
+            attributedString: fragmentAttributedString,
             descent: descent,
             baseSize: baseSize,
             scaledSize: scaledSize,

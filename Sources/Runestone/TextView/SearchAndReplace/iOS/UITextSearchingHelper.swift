@@ -92,14 +92,16 @@ extension UITextSearchingHelper: UITextSearching {
         guard let foundTextRange = foundTextRange as? IndexedRange else {
             return
         }
-        _textView.highlightedRanges.removeAll { $0.range == foundTextRange.range }
+        var searchHighlights = _textView.highlightedRanges(forCategory: .search)
+        searchHighlights.removeAll { $0.range == foundTextRange.range }
         if let highlightedRange = _textView.theme.highlightedRange(forFoundTextRange: foundTextRange.range, ofStyle: style) {
-            _textView.highlightedRanges.append(highlightedRange)
+            searchHighlights.append(highlightedRange)
         }
+        _textView.setHighlightedRanges(searchHighlights, forCategory: .search)
     }
 
     func clearAllDecoratedFoundText() {
-        _textView.highlightedRanges = []
+        _textView.removeHighlights(forCategory: .search)
     }
 
     func replaceAll(queryString: String, options: UITextSearchOptions, withText replacementText: String) {
@@ -121,7 +123,8 @@ extension UITextSearchingHelper: UITextSearching {
             // iOS 16 beta 2 will call this function when presenting the find/replace navigator and pass <uninitialized> to foundTextRange. If we return false in this case, the find/replace UI will not be shown, so we need to return true when we can't convert the UITextRange to an IndexedRange.
             return true
         }
-        guard let highlightedRange = _textView.highlightedRanges.first(where: { $0.range == foundTextRange.range }) else {
+        let searchHighlights = _textView.highlightedRanges(forCategory: .search)
+        guard let highlightedRange = searchHighlights.first(where: { $0.range == foundTextRange.range }) else {
             return false
         }
         return _textView.editorDelegate?.textView(_textView, canReplaceTextIn: highlightedRange) ?? false

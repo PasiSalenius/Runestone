@@ -10,9 +10,9 @@ final class FindController: NSObject {
             updateReplaceButtonState()
 
             guard textView != oldValue else { return }
-            
-            oldValue?.highlightedRanges.removeAll()
-            
+
+            oldValue?.removeHighlights(forCategory: .search)
+
             // When switching to a different text view, re-run the search
             if findPanelWindow.isVisible, !searchQuery.isEmpty {
                 performSearch(query: searchQuery, options: searchOptions)
@@ -241,7 +241,7 @@ final class FindController: NSObject {
         guard let textView else { return }
 
         guard !searchResults.isEmpty else {
-            textView.highlightedRanges.removeAll()
+            textView.removeHighlights(forCategory: .search)
             return
         }
 
@@ -259,12 +259,12 @@ final class FindController: NSObject {
                 highlightedRanges.append(highlightedRange)
             }
         }
-        
-        textView.highlightedRanges = highlightedRanges
+
+        textView.setHighlightedRanges(highlightedRanges, forCategory: .search)
     }
 
     private func clearSearchHighlights() {
-        textView?.highlightedRanges.removeAll()
+        textView?.removeHighlights(forCategory: .search)
     }
 
     private func scrollToCurrentMatch() {
@@ -298,7 +298,8 @@ extension FindController: FindPanelDelegate {
         let matchRange = searchResults[searchResultIndex].range
 
         // Check if we can replace
-        if let highlightedRange = textView.highlightedRanges.first(where: { $0.range == matchRange }) {
+        let searchHighlights = textView.highlightedRanges(forCategory: .search)
+        if let highlightedRange = searchHighlights.first(where: { $0.range == matchRange }) {
             if let canReplace = textView.editorDelegate?.textView(textView, canReplaceTextIn: highlightedRange), !canReplace {
                 return
             }

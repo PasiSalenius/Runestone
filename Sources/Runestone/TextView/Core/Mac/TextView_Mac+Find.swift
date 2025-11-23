@@ -75,7 +75,7 @@ extension TextView {
             findController.refreshSearch()
         } else {
             // This text view is not being searched - just clear any old highlights
-            highlightedRanges.removeAll()
+            removeHighlights(forCategory: .search)
         }
     }
 

@@ -8,19 +8,40 @@ final class HighlightService {
             }
         }
     }
-    var highlightedRanges: [HighlightedRange] = [] {
-        didSet {
-            if highlightedRanges != oldValue {
-                invalidateHighlightedRangeFragments()
-            }
+    var highlightedRanges: [HighlightedRange] {
+        get {
+            mergedHighlightedRanges
+        }
+        set {
+            // For backward compatibility: setting highlightedRanges directly puts everything in .custom("") category
+            highlightedRangesByCategory = [.custom(""): newValue]
+            updateMergedRanges()
         }
     }
 
+    private var highlightedRangesByCategory: [HighlightCategory: [HighlightedRange]] = [:] {
+        didSet {
+            updateMergedRanges()
+        }
+    }
+    private var mergedHighlightedRanges: [HighlightedRange] = []
     private var highlightedRangeFragmentsPerLine: [DocumentLineNodeID: [HighlightedRangeFragment]] = [:]
     private var highlightedRangeFragmentsPerLineFragment: [LineFragmentID: [HighlightedRangeFragment]] = [:]
 
     init(lineManager: LineManager) {
         self.lineManager = lineManager
+    }
+
+    func setHighlightedRanges(_ ranges: [HighlightedRange], forCategory category: HighlightCategory) {
+        highlightedRangesByCategory[category] = ranges
+    }
+
+    func highlightedRanges(forCategory category: HighlightCategory) -> [HighlightedRange] {
+        highlightedRangesByCategory[category] ?? []
+    }
+
+    func removeHighlights(forCategory category: HighlightCategory) {
+        highlightedRangesByCategory.removeValue(forKey: category)
     }
 
     func highlightedRangeFragments(for lineFragment: LineFragment, inLineWithID lineID: DocumentLineNodeID) -> [HighlightedRangeFragment] {
@@ -35,6 +56,13 @@ final class HighlightService {
 }
 
 private extension HighlightService {
+    private func updateMergedRanges() {
+        // Merge all categories and sort by priority (lower priority first, so higher priority draws on top)
+        let allRanges = highlightedRangesByCategory.values.flatMap { $0 }
+        mergedHighlightedRanges = allRanges.sorted { $0.priority < $1.priority }
+        invalidateHighlightedRangeFragments()
+    }
+
     private func invalidateHighlightedRangeFragments() {
         highlightedRangeFragmentsPerLine.removeAll()
         highlightedRangeFragmentsPerLineFragment.removeAll()
@@ -58,6 +86,7 @@ private extension HighlightService {
                                                                         containsStart: containsStart,
                                                                         containsEnd: containsEnd,
                                                                         color: highlightedRange.color,
+                                                                        textColor: highlightedRange.textColor,
                                                                         cornerRadius: highlightedRange.cornerRadius)
                 if let existingHighlightedRangeFragments = result[line.id] {
                     result[line.id] = existingHighlightedRangeFragments + [highlightedRangeFragment]
@@ -85,6 +114,7 @@ private extension HighlightService {
                                             containsStart: containsStart,
                                             containsEnd: containsEnd,
                                             color: lineHighlightedRangeFragment.color,
+                                            textColor: lineHighlightedRangeFragment.textColor,
                                             cornerRadius: lineHighlightedRangeFragment.cornerRadius)
         }
     }

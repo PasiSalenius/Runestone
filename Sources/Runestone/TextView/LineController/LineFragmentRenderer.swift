@@ -108,8 +108,47 @@ private extension LineFragmentRenderer {
         context.scaleBy(x: 1, y: -1)
         let yPosition = lineFragment.descent + (lineFragment.scaledSize.height - lineFragment.baseSize.height) / 2
         context.textPosition = CGPoint(x: 0, y: yPosition)
-        CTLineDraw(lineFragment.line, context)
+
+        // Check if any highlighted ranges have custom text colors
+        let hasCustomTextColors = highlightedRangeFragments.contains { $0.textColor != nil }
+
+        if hasCustomTextColors {
+            // Create modified attributed string with text color overrides
+            let modifiedAttributedString = applyTextColorOverrides(to: lineFragment.attributedString)
+            // Create new CTLine from modified attributed string
+            let modifiedLine = CTLineCreateWithAttributedString(modifiedAttributedString)
+            CTLineDraw(modifiedLine, context)
+        } else {
+            // Use existing line (fast path)
+            CTLineDraw(lineFragment.line, context)
+        }
+
         context.restoreGState()
+    }
+
+    private func applyTextColorOverrides(to attributedString: NSAttributedString) -> NSAttributedString {
+        let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
+
+        // Sort fragments by priority (higher priority wins for overlapping ranges)
+        let sortedFragments = highlightedRangeFragments.sorted { $0.range.location < $1.range.location }
+
+        // Apply text color overrides for each fragment with custom text color
+        for fragment in sortedFragments {
+            guard let textColor = fragment.textColor else { continue }
+
+            // Convert from line-local coordinates to attributed-string-local coordinates
+            // fragment.range is in line-local coords, but attributedString uses visibleRange-local coords
+            let fragmentLocalRange = fragment.range.local(to: lineFragment.visibleRange)
+
+            // Add foreground color attribute for this range
+            mutableAttributedString.addAttribute(
+                .foregroundColor,
+                value: textColor,
+                range: fragmentLocalRange
+            )
+        }
+
+        return mutableAttributedString
     }
 
     private func drawInvisibleCharacters(in string: String) {

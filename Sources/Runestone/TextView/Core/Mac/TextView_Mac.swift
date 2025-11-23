@@ -661,6 +661,27 @@ open class TextView: NSView, NSMenuItemValidation {
         textViewController.highlightNavigationController.selectRange(at: index)
     }
 
+    /// Sets highlighted ranges for a specific category.
+    /// - Parameters:
+    ///   - ranges: The highlighted ranges to set.
+    ///   - category: The category to set ranges for.
+    public func setHighlightedRanges(_ ranges: [HighlightedRange], forCategory category: HighlightCategory) {
+        textViewController.setHighlightedRanges(ranges, forCategory: category)
+    }
+
+    /// Returns highlighted ranges for a specific category.
+    /// - Parameter category: The category to get ranges for.
+    /// - Returns: Array of highlighted ranges in the specified category.
+    public func highlightedRanges(forCategory category: HighlightCategory) -> [HighlightedRange] {
+        textViewController.highlightedRanges(forCategory: category)
+    }
+
+    /// Removes all highlighted ranges in a specific category.
+    /// - Parameter category: The category to remove ranges from.
+    public func removeHighlights(forCategory category: HighlightCategory) {
+        textViewController.removeHighlights(forCategory: category)
+    }
+
     /// Scrolls the text view to reveal the text in the specified range.
     ///
     /// The function will scroll the text view as little as possible while revealing as much as possible of the specified range. It is not guaranteed that the entire range is visible after performing the scroll.

@@ -78,10 +78,10 @@ public final class DefaultTheme: Runestone.Theme {
         switch style {
         case .found:
             let color = MultiPlatformColor(themeColorNamed: "search_match_found")
-            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 3)
         case .highlighted:
             let color = MultiPlatformColor(themeColorNamed: "search_match_highlighted")
-            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 3)
         case .normal:
             return nil
         @unknown default:
@@ -92,10 +92,10 @@ public final class DefaultTheme: Runestone.Theme {
     public func highlightedRange(forFoundTextRange foundTextRange: NSRange, isSelected: Bool) -> HighlightedRange? {
         if isSelected {
             let color = MultiPlatformColor(themeColorNamed: "search_match_highlighted")
-            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 3)
         } else {
             let color = MultiPlatformColor(themeColorNamed: "search_match_found")
-            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 2)
+            return HighlightedRange(range: foundTextRange, color: color, cornerRadius: 3)
         }
     }
 #endif

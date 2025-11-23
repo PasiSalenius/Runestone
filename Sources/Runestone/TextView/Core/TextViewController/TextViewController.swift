@@ -522,6 +522,26 @@ final class TextViewController {
             }
         }
     }
+
+    func setHighlightedRanges(_ ranges: [HighlightedRange], forCategory category: HighlightCategory) {
+        highlightService.setHighlightedRanges(ranges, forCategory: category)
+        let allRanges = highlightService.highlightedRanges
+        layoutManager.setNeedsLayout()
+        layoutManager.layoutIfNeeded()
+        highlightNavigationController.highlightedRanges = allRanges
+    }
+
+    func highlightedRanges(forCategory category: HighlightCategory) -> [HighlightedRange] {
+        highlightService.highlightedRanges(forCategory: category)
+    }
+
+    func removeHighlights(forCategory category: HighlightCategory) {
+        highlightService.removeHighlights(forCategory: category)
+        let allRanges = highlightService.highlightedRanges
+        layoutManager.setNeedsLayout()
+        layoutManager.layoutIfNeeded()
+        highlightNavigationController.highlightedRanges = allRanges
+    }
     var highlightedRangeLoopingMode: HighlightedRangeLoopingMode {
         get {
             if highlightNavigationController.loopRanges {
@@ -623,6 +643,7 @@ final class TextViewController {
         layoutManager.lineManager = state.lineManager
         contentSizeService.invalidateContentSize()
         gutterWidthService.invalidateLineNumberWidth()
+        highlightedRanges = []
         if addUndoAction {
             if newText != oldText {
                 let newRange = NSRange(location: 0, length: newText.length)

@@ -30,6 +30,8 @@ final class LineFragment {
     let hiddenLength: Int
     /// The underlying line.
     let line: CTLine
+    /// The attributed string for this line fragment.
+    let attributedString: NSAttributedString
     /// The lenth of the descent.
     let descent: CGFloat
     /// The non-scaled height of the line fragment.
@@ -54,6 +56,7 @@ final class LineFragment {
         index: Int,
         visibleRange: NSRange,
         line: CTLine,
+        attributedString: NSAttributedString,
         descent: CGFloat,
         baseSize: CGSize,
         scaledSize: CGSize,
@@ -65,6 +68,7 @@ final class LineFragment {
             visibleRange: visibleRange,
             hiddenLength: 0,
             line: line,
+            attributedString: attributedString,
             descent: descent,
             baseSize: baseSize,
             scaledSize: scaledSize,
@@ -78,6 +82,7 @@ final class LineFragment {
         visibleRange: NSRange,
         hiddenLength: Int,
         line: CTLine,
+        attributedString: NSAttributedString,
         descent: CGFloat,
         baseSize: CGSize,
         scaledSize: CGSize,
@@ -88,6 +93,7 @@ final class LineFragment {
         self.visibleRange = visibleRange
         self.hiddenLength = hiddenLength
         self.line = line
+        self.attributedString = attributedString
         self.descent = descent
         self.baseSize = baseSize
         self.scaledSize = scaledSize
@@ -101,6 +107,7 @@ final class LineFragment {
             visibleRange: visibleRange,
             hiddenLength: hiddenLength,
             line: line,
+            attributedString: attributedString,
             descent: descent,
             baseSize: baseSize,
             scaledSize: scaledSize,
