@@ -53,6 +53,12 @@ final class HighlightService {
             return highlightedLineFragments
         }
     }
+
+    func invalidateHighlightedRangeFragments() {
+        highlightedRangeFragmentsPerLine.removeAll()
+        highlightedRangeFragmentsPerLineFragment.removeAll()
+        highlightedRangeFragmentsPerLine = createHighlightedRangeFragmentsPerLine()
+    }
 }
 
 private extension HighlightService {
@@ -61,12 +67,6 @@ private extension HighlightService {
         let allRanges = highlightedRangesByCategory.values.flatMap { $0 }
         mergedHighlightedRanges = allRanges.sorted { $0.priority < $1.priority }
         invalidateHighlightedRangeFragments()
-    }
-
-    private func invalidateHighlightedRangeFragments() {
-        highlightedRangeFragmentsPerLine.removeAll()
-        highlightedRangeFragmentsPerLineFragment.removeAll()
-        highlightedRangeFragmentsPerLine = createHighlightedRangeFragmentsPerLine()
     }
 
     private func createHighlightedRangeFragmentsPerLine() -> [DocumentLineNodeID: [HighlightedRangeFragment]] {
