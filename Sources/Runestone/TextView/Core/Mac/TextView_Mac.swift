@@ -422,6 +422,9 @@ open class TextView: NSView, NSMenuItemValidation {
     private let scrollView = NSScrollView()
     private let caretView = CaretView()
     private let selectionViewReuseQueue = ViewReuseQueue<String, LineSelectionView>()
+    // Autoscroll support for text selection
+    var autoscrollTimer: Timer?
+    var currentDragEvent: NSEvent?
     private var isWindowKey = false {
         didSet {
             if isWindowKey != oldValue {
@@ -770,7 +773,7 @@ private extension TextView {
 
     private func scrollToVisibleLocationIfNeeded() {
         if isAutomaticScrollEnabled, let newRange = textViewController.selectedRange, newRange.length == 0 {
-            textViewController.scrollLocationToVisible(newRange.location)
+            textViewController.scrollLocationToVisible(newRange.location, applyScrollPadding: false)
         }
     }
 }

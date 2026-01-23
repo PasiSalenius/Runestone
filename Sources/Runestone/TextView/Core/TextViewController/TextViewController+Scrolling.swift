@@ -1,19 +1,19 @@
 import Foundation
 
  extension TextViewController {
-    func scrollRangeToVisible(_ range: NSRange) {
+    func scrollRangeToVisible(_ range: NSRange, applyScrollPadding: Bool = true) {
         layoutManager.layoutLines(toLocation: range.upperBound)
-        justScrollRangeToVisible(range)
+        justScrollRangeToVisible(range, applyScrollPadding: applyScrollPadding)
     }
 
-    func scrollLocationToVisible(_ location: Int) {
+    func scrollLocationToVisible(_ location: Int, applyScrollPadding: Bool = true) {
         let range = NSRange(location: location, length: 0)
-        justScrollRangeToVisible(range)
+        justScrollRangeToVisible(range, applyScrollPadding: applyScrollPadding)
     }
 }
 
 private extension TextViewController {
-    private func justScrollRangeToVisible(_ range: NSRange) {
+    private func justScrollRangeToVisible(_ range: NSRange, applyScrollPadding: Bool) {
         let lowerBoundRect = caretRect(at: range.lowerBound)
         let upperBoundRect = range.length == 0 ? lowerBoundRect : caretRect(at: range.upperBound)
         let rectMinX = min(lowerBoundRect.minX, upperBoundRect.minX)
@@ -21,7 +21,7 @@ private extension TextViewController {
         let rectMinY = min(lowerBoundRect.minY, upperBoundRect.minY)
         let rectMaxY = max(lowerBoundRect.maxY, upperBoundRect.maxY)
         let rect = CGRect(x: rectMinX, y: rectMinY, width: rectMaxX - rectMinX, height: rectMaxY - rectMinY)
-        scrollView.contentOffset = contentOffsetForScrollingToVisibleRect(rect)
+        scrollView.contentOffset = contentOffsetForScrollingToVisibleRect(rect, applyScrollPadding: applyScrollPadding)
     }
 
     private func caretRect(at location: Int) -> CGRect {
@@ -40,8 +40,8 @@ private extension TextViewController {
     /// The function will return a rectangle that scrolls the text view a minimum amount while revealing as much as possible of the rectangle. It is not guaranteed that the entire rectangle can be revealed.
     /// - Parameter rect: The rectangle to reveal.
     /// - Returns: The content offset to scroll to.
-    private func contentOffsetForScrollingToVisibleRect(_ rect: CGRect) -> CGPoint {
-        let scrollPadding: CGFloat = 60
+    private func contentOffsetForScrollingToVisibleRect(_ rect: CGRect, applyScrollPadding: Bool) -> CGPoint {
+        let scrollPadding: CGFloat = applyScrollPadding ? 60 : 0
         // Create the viewport: a rectangle containing the content that is visible to the user.
         var viewport = CGRect(origin: scrollView.contentOffset, size: textView.frame.size)
         viewport.origin.y += scrollView.adjustedContentInset.top + textContainerInset.top

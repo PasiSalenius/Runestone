@@ -1208,7 +1208,7 @@ private extension TextView {
 
     private func scrollToVisibleLocationIfNeeded() {
         if isAutomaticScrollEnabled, let newRange = textViewController.selectedRange, newRange.length == 0 {
-            textViewController.scrollLocationToVisible(newRange.location)
+            textViewController.scrollLocationToVisible(newRange.location, applyScrollPadding: false)
         }
     }
 }
