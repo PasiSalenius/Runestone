@@ -39,7 +39,8 @@ public extension TextView {
     override func mouseUp(with event: NSEvent) {
         super.mouseUp(with: event)
         stopAutoscrollTimer()
-        if event.clickCount == 1 {
+        // Don't extend drag selection if shift was held (shift+click handles selection differently)
+        if event.clickCount == 1 && !event.modifierFlags.contains(.shift) {
             let location = locationClosestToPoint(in: event)
             textViewController.extendDraggedSelection(to: location)
         }
