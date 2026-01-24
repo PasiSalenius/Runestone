@@ -128,13 +128,22 @@ extension TextViewController {
 private extension TextViewController {
     private func move(by granularity: TextGranularity, inDirection direction: TextDirection) {
         if let selectedRange {
-            self.selectedRange = selectionService.range(moving: selectedRange, by: granularity, inDirection: direction)
+            let newRange = selectionService.range(moving: selectedRange, by: granularity, inDirection: direction)
+            self.selectedRange = newRange
+            // Scroll to keep the active selection endpoint visible
+            // When extending backward, the lowerBound is moving; when extending forward, the upperBound is moving
+            let locationToScroll = direction == .backward ? newRange.lowerBound : newRange.upperBound
+            scrollLocationToVisible(locationToScroll)
         }
     }
 
     private func move(toBoundary boundary: TextBoundary, inDirection direction: TextDirection) {
         if let selectedRange {
-            self.selectedRange = selectionService.range(moving: selectedRange, toBoundary: boundary, inDirection: direction)
+            let newRange = selectionService.range(moving: selectedRange, toBoundary: boundary, inDirection: direction)
+            self.selectedRange = newRange
+            // Scroll to keep the active selection endpoint visible
+            let locationToScroll = direction == .backward ? newRange.lowerBound : newRange.upperBound
+            scrollLocationToVisible(locationToScroll)
         }
     }
 }

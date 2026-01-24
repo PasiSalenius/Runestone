@@ -150,24 +150,24 @@ private extension TextViewController {
         guard let selectedRange = selectedRange?.nonNegativeLength else {
             return
         }
+        let newLocation: Int
         switch granularity {
         case .character:
             if selectedRange.length == 0 {
                 let sourceLocation = selectedRange.bound(in: direction)
-                let location = navigationService.location(movingFrom: sourceLocation, byCharacterCount: 1, inDirection: direction)
-                self.selectedRange = NSRange(location: location, length: 0)
+                newLocation = navigationService.location(movingFrom: sourceLocation, byCharacterCount: 1, inDirection: direction)
             } else {
-                let location = selectedRange.bound(in: direction)
-                self.selectedRange = NSRange(location: location, length: 0)
+                newLocation = selectedRange.bound(in: direction)
             }
         case .line:
-            let location = navigationService.location(movingFrom: selectedRange.location, byLineCount: 1, inDirection: direction)
-            self.selectedRange = NSRange(location: location, length: 0)
+            let sourceLocation = selectedRange.bound(in: direction)
+            newLocation = navigationService.location(movingFrom: sourceLocation, byLineCount: 1, inDirection: direction)
         case .word:
             let sourceLocation = selectedRange.bound(in: direction)
-            let location = navigationService.location(movingFrom: sourceLocation, byWordCount: 1, inDirection: direction)
-            self.selectedRange = NSRange(location: location, length: 0)
+            newLocation = navigationService.location(movingFrom: sourceLocation, byWordCount: 1, inDirection: direction)
         }
+        self.selectedRange = NSRange(location: newLocation, length: 0)
+        scrollLocationToVisible(newLocation)
     }
 
     private func move(toBoundary boundary: TextBoundary, inDirection direction: TextDirection) {
@@ -177,6 +177,7 @@ private extension TextViewController {
         let sourceLocation = selectedRange.bound(in: direction)
         let location = navigationService.location(moving: sourceLocation, toBoundary: boundary, inDirection: direction)
         self.selectedRange = NSRange(location: location, length: 0)
+        scrollLocationToVisible(location)
     }
 }
 

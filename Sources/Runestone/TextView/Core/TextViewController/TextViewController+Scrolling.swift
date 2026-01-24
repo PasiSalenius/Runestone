@@ -41,7 +41,7 @@ private extension TextViewController {
     /// - Parameter rect: The rectangle to reveal.
     /// - Returns: The content offset to scroll to.
     private func contentOffsetForScrollingToVisibleRect(_ rect: CGRect, applyScrollPadding: Bool) -> CGPoint {
-        let scrollPadding: CGFloat = applyScrollPadding ? 60 : 0
+        let scrollPadding: CGFloat = applyScrollPadding ? 20 : 0
         // Create the viewport: a rectangle containing the content that is visible to the user.
         var viewport = CGRect(origin: scrollView.contentOffset, size: textView.frame.size)
         viewport.origin.y += scrollView.adjustedContentInset.top + textContainerInset.top
