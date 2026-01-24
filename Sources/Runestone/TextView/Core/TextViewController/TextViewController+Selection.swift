@@ -75,6 +75,54 @@ extension TextViewController {
     func selectLine(at location: Int) {
         selectedRange = selectionService.rangeBySelectingLine(at: location)
     }
+
+    func movePageUpAndModifySelection() {
+        guard let selectedRange = selectedRange else {
+            return
+        }
+
+        let pageHeight = calculatePageHeight()
+        let currentRect = caretRectInDocument(at: selectedRange.upperBound)
+        let targetY = currentRect.minY - pageHeight
+        let targetPoint = CGPoint(x: currentRect.minX, y: max(0, targetY))
+        let newLocation = characterIndex(at: targetPoint)
+
+        extendSelection(to: newLocation)
+        scrollLocationToVisible(newLocation)
+    }
+
+    func movePageDownAndModifySelection() {
+        guard let selectedRange = selectedRange else {
+            return
+        }
+
+        let pageHeight = calculatePageHeight()
+        let currentRect = caretRectInDocument(at: selectedRange.upperBound)
+        let targetY = currentRect.minY + pageHeight
+        let targetPoint = CGPoint(x: currentRect.minX, y: targetY)
+        let newLocation = characterIndex(at: targetPoint)
+
+        extendSelection(to: newLocation)
+        scrollLocationToVisible(newLocation)
+    }
+
+    private func extendSelection(to newLocation: Int) {
+        guard let currentRange = selectedRange else {
+            return
+        }
+
+        // Determine anchor point (where selection started)
+        let anchor = currentRange.length > 0 ? currentRange.location : currentRange.location
+
+        let newRange: NSRange
+        if newLocation >= anchor {
+            newRange = NSRange(location: anchor, length: newLocation - anchor)
+        } else {
+            newRange = NSRange(location: newLocation, length: anchor - newLocation)
+        }
+
+        selectedRange = newRange
+    }
 }
 
 private extension TextViewController {

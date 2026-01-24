@@ -7,7 +7,11 @@ public extension TextView {
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         let location = locationClosestToPoint(in: event)
-        if event.clickCount == 1 {
+
+        // Check for Shift modifier to extend selection
+        if event.modifierFlags.contains(.shift) {
+            self.extendSelectionOnShiftClick(to: location)
+        } else if event.clickCount == 1 {
             textViewController.move(to: location)
             textViewController.startDraggingSelection(from: location)
             startAutoscrollTimer()
@@ -50,9 +54,48 @@ public extension TextView {
         }
         super.rightMouseDown(with: event)
     }
+
+    // MARK: - Shift+Click Selection
+
+    private func extendSelectionOnShiftClick(to clickLocation: Int) {
+        guard let currentRange = textViewController.selectedRange else {
+            // No existing selection, just move cursor
+            textViewController.move(to: clickLocation)
+            return
+        }
+
+        // Determine anchor point (where selection started)
+        // If there's a selection, anchor is at the opposite end from where we're extending
+        let anchor: Int
+        if currentRange.length == 0 {
+            // Zero-length selection: anchor is current position
+            anchor = currentRange.location
+        } else {
+            // Determine which end is closer to the click
+            let distanceToStart = abs(clickLocation - currentRange.location)
+            let distanceToEnd = abs(clickLocation - currentRange.upperBound)
+
+            // Anchor at the opposite end
+            anchor = distanceToStart < distanceToEnd ? currentRange.upperBound : currentRange.location
+        }
+
+        // Create new selection from anchor to click location
+        let newRange: NSRange
+        if clickLocation >= anchor {
+            newRange = NSRange(location: anchor, length: clickLocation - anchor)
+        } else {
+            newRange = NSRange(location: clickLocation, length: anchor - clickLocation)
+        }
+
+        textViewController.selectedRange = newRange
+
+        // Don't start drag timer for Shift+Click
+        // User might click again to further extend selection
+    }
 }
 
 private extension TextView {
+
     private func locationClosestToPoint(in event: NSEvent) -> Int {
         let point = scrollContentView.convert(event.locationInWindow, from: nil)
         return characterIndex(for: point)

@@ -169,5 +169,25 @@ public extension TextView {
     override func moveWordRightAndModifySelection(_ sender: Any?) {
         textViewController.moveWordRightAndModifySelection()
     }
+
+    /// Move the insertion pointer up one page.
+    override func scrollPageUp(_ sender: Any?) {
+        textViewController.movePageUp()
+    }
+
+    /// Move the insertion pointer down one page.
+    override func scrollPageDown(_ sender: Any?) {
+        textViewController.movePageDown()
+    }
+
+    /// Extend the selection up one page.
+    override func pageUpAndModifySelection(_ sender: Any?) {
+        textViewController.movePageUpAndModifySelection()
+    }
+
+    /// Extend the selection down one page.
+    override func pageDownAndModifySelection(_ sender: Any?) {
+        textViewController.movePageDownAndModifySelection()
+    }
 }
 #endif

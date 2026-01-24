@@ -158,6 +158,224 @@ public extension TextView {
         }
         deleteText(toBoundary: .word, inDirection: .backward)
     }
+
+    // MARK: - Emacs-Style Keyboard Shortcuts
+
+    /// Control+A - Move to beginning of line (Emacs-style)
+    override func moveToLeftEndOfLine(_ sender: Any?) {
+        textViewController.moveToBeginningOfLine()
+    }
+
+    /// Control+E - Move to end of line (Emacs-style)
+    override func moveToRightEndOfLine(_ sender: Any?) {
+        textViewController.moveToEndOfLine()
+    }
+
+    /// Control+K - Delete to end of line (kill line)
+    /// Note: macOS maps Control+K to deleteToEndOfParagraph, not deleteToEndOfLine
+    override func deleteToEndOfParagraph(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+        guard selectedRange.length == 0 else {
+            // If there's a selection, just delete it
+            deleteBackward(nil)
+            return
+        }
+
+        let lineManager = textViewController.lineManager
+
+        // Find the end of the current line
+        guard let line = lineManager.line(containingCharacterAt: selectedRange.location) else {
+            return
+        }
+
+        let lineEndLocation = line.location + line.data.length
+        let deletionRange: NSRange
+
+        // If we're at the end of the line, delete the line ending character
+        if selectedRange.location == lineEndLocation {
+            // Delete newline character
+            deletionRange = NSRange(location: selectedRange.location, length: line.data.delimiterLength)
+        } else {
+            // Delete from cursor to end of line (not including newline)
+            deletionRange = NSRange(
+                location: selectedRange.location,
+                length: lineEndLocation - selectedRange.location
+            )
+        }
+
+        guard deletionRange.length > 0 else {
+            return
+        }
+
+        // Select the range to delete, then call deleteBackward to handle it
+        textViewController.selectedRange = deletionRange
+        deleteBackward(nil)
+    }
+
+    /// Command+Delete - Delete to beginning of line
+    override func deleteToBeginningOfLine(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+        guard selectedRange.length == 0 else {
+            // If there's a selection, just delete it
+            deleteBackward(nil)
+            return
+        }
+
+        let lineManager = textViewController.lineManager
+
+        // Find the beginning of the current line
+        guard let line = lineManager.line(containingCharacterAt: selectedRange.location) else {
+            return
+        }
+
+        let deletionRange = NSRange(
+            location: line.location,
+            length: selectedRange.location - line.location
+        )
+
+        guard deletionRange.length > 0 else {
+            return
+        }
+
+        // Select the range to delete, then call deleteBackward to handle it
+        textViewController.selectedRange = deletionRange
+        deleteBackward(nil)
+    }
+
+    /// Control+T - Transpose characters (swap before/after cursor)
+    override func transpose(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+        guard selectedRange.length == 0 else {
+            // Don't transpose if there's a selection
+            return
+        }
+
+        let string = textViewController.stringView.string
+        let location = selectedRange.location
+
+        // Need at least one character before and after, or at end of non-empty string
+        guard location > 0 && location <= string.length else {
+            return
+        }
+
+        let beforeLocation: Int
+        let afterLocation: Int
+
+        if location == string.length && location >= 2 {
+            // At end of string: swap last two characters
+            beforeLocation = location - 2
+            afterLocation = location - 1
+        } else if location > 0 && location < string.length {
+            // In middle: swap character before and after cursor
+            beforeLocation = location - 1
+            afterLocation = location
+        } else {
+            return
+        }
+
+        let beforeRange = NSRange(location: beforeLocation, length: 1)
+        let afterRange = NSRange(location: afterLocation, length: 1)
+
+        guard let beforeChar = textViewController.text(in: beforeRange),
+              let afterChar = textViewController.text(in: afterRange) else {
+            return
+        }
+
+        // Perform the swap
+        let combinedRange = NSRange(location: beforeLocation, length: 2)
+        let swappedText = afterChar + beforeChar
+
+        textViewController.replaceText(in: combinedRange, with: swappedText)
+        // Move cursor past the swapped characters
+        textViewController.selectedRange = NSRange(location: afterLocation + 1, length: 0)
+    }
+
+    /// Control+O - Insert newline without moving cursor
+    override func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+
+        let newlineSymbol = lineEndings.symbol
+        guard textViewController.shouldChangeText(in: selectedRange, replacementText: newlineSymbol) else {
+            return
+        }
+
+        let originalLocation = selectedRange.location
+        textViewController.replaceText(in: selectedRange, with: newlineSymbol)
+
+        // Restore cursor position asynchronously to ensure all text processing completes first
+        DispatchQueue.main.async { [weak self] in
+            self?.textViewController.selectedRange = NSRange(location: originalLocation, length: 0)
+        }
+    }
+
+    // MARK: - Text Transformations
+
+    /// Transform selected text to uppercase
+    override func uppercaseWord(_ sender: Any?) {
+        transformSelectedText { $0.uppercased() }
+    }
+
+    /// Transform selected text to lowercase
+    override func lowercaseWord(_ sender: Any?) {
+        transformSelectedText { $0.lowercased() }
+    }
+
+    /// Capitalize first letter of each word in selection
+    override func capitalizeWord(_ sender: Any?) {
+        transformSelectedText { $0.capitalized }
+    }
+
+    private func transformSelectedText(using transformation: (String) -> String) {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+        guard selectedRange.length > 0 else {
+            // No selection, nothing to transform
+            return
+        }
+        guard let selectedText = textViewController.text(in: selectedRange) else {
+            return
+        }
+
+        let transformedText = transformation(selectedText)
+
+        // Only replace if text actually changed
+        guard transformedText != selectedText else {
+            return
+        }
+
+        // Perform replacement
+        textViewController.replaceText(in: selectedRange, with: transformedText)
+
+        // Restore selection to transformed text
+        textViewController.selectedRange = NSRange(
+            location: selectedRange.location,
+            length: transformedText.count
+        )
+    }
 }
 
 private extension TextView {

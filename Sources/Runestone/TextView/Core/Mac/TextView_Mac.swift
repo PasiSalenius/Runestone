@@ -727,6 +727,11 @@ open class TextView: NSView, NSMenuItemValidation {
         } else if menuItem.action == #selector(performTextFinderAction(_:)) {
             // Enable NSTextFinder actions (bridged to custom find panel on macOS 12+)
             return true
+        } else if menuItem.action == #selector(uppercaseWord(_:)) ||
+                  menuItem.action == #selector(lowercaseWord(_:)) ||
+                  menuItem.action == #selector(capitalizeWord(_:)) {
+            // Enable transformations only if text is selected and editable
+            return isEditable && selectedRange().length > 0
         } else {
             return true
         }
