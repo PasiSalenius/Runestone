@@ -159,15 +159,10 @@ final class SelectionService {
         guard let line = lineManager.line(containingCharacterAt: location) else {
             return NSRange(location: location, length: 0)
         }
-        let lineController = lineControllerStorage.getOrCreateLineController(for: line)
-        let lineLocalLocation = location - line.location
-        guard let lineFragment = lineController.lineFragmentNode(containingCharacterAt: lineLocalLocation) else {
-            return NSRange(location: location, length: 0)
-        }
-        guard let range = lineFragment.data.lineFragment?.range else {
-            return NSRange(location: location, length: 0)
-        }
-        return NSRange(location: line.location + range.location, length: range.length)
+        // Select the entire logical line including its delimiter (like TextEdit)
+        // This ensures wrapped lines are fully selected, not just the visual fragment
+        let length = line.data.length + line.data.delimiterLength
+        return NSRange(location: line.location, length: length)
     }
 }
 
