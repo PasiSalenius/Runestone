@@ -140,10 +140,12 @@ final class SelectionService {
         ]
         if let scalar = Unicode.Scalar(character), CharacterSet.whitespaces.contains(scalar) {
             return rangeOfWhitespace(matching: character, at: location)
-        } else if CharacterSet.alphanumerics.containsAllCharacters(of: substring) {
-            let lowerBound = stringTokenizer.location(from: location, toBoundary: .word, inDirection: .backward) ?? location
-            let upperBound = stringTokenizer.location(from: location, toBoundary: .word, inDirection: .forward) ?? location
-            return NSRange(location: lowerBound, length: upperBound - lowerBound)
+        } else if CharacterSet.alphanumerics.containsAllCharacters(of: substring) || isWordConnector(substring) {
+            // Include periods, dashes, percent signs, underscores, colons, and dollar signs as word characters
+            // This allows selecting version numbers (4.39.0), URL paths (consent-status),
+            // URL-encoded strings (%7B%22gdpr%22), identifiers (user_name), URLs with ports (localhost:8080),
+            // and shell variables ($PATH) as single words
+            return rangeOfExtendedWord(at: location)
         } else if let selectableSymbol = selectableSymbols.first(where: { $0 == substring }) {
             return NSRange(location: location, length: selectableSymbol.count)
         } else if let bracketPair = bracketPairs.first(where: { $0.opening == substring }) {
@@ -175,6 +177,36 @@ private extension SelectionService {
         } else {
             return .backward
         }
+    }
+
+    private func isWordConnector(_ substring: String) -> Bool {
+        // Treat periods, dashes, percent signs, underscores, colons, and dollar signs as word connectors
+        return substring == "." || substring == "-" || substring == "%" || substring == "_" || substring == ":" || substring == "$"
+    }
+
+    private func isExtendedWordCharacter(at location: Int) -> Bool {
+        guard location >= 0 && location < stringView.string.length else {
+            return false
+        }
+        let substringRange = stringView.string.customRangeOfComposedCharacterSequence(at: location)
+        let substring = stringView.string.substring(with: substringRange)
+        return CharacterSet.alphanumerics.containsAllCharacters(of: substring) || isWordConnector(substring)
+    }
+
+    private func rangeOfExtendedWord(at location: Int) -> NSRange {
+        // Scan backward to find the start of the word
+        var lowerBound = location
+        while lowerBound > 0 && isExtendedWordCharacter(at: lowerBound - 1) {
+            lowerBound -= 1
+        }
+
+        // Scan forward to find the end of the word
+        var upperBound = location
+        while upperBound < stringView.string.length && isExtendedWordCharacter(at: upperBound) {
+            upperBound += 1
+        }
+
+        return NSRange(location: lowerBound, length: upperBound - lowerBound)
     }
 
     private func rangeOfWhitespace(matching character: unichar, at location: Int) -> NSRange {
