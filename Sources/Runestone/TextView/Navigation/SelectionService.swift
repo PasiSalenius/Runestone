@@ -111,6 +111,11 @@ final class SelectionService {
         return range
     }
 
+    func updateDragOrigin(to location: Int) {
+        lineNavigationLocationService.reset()
+        selectionOrigin = location
+    }
+
     func rangeByExtendingDraggedSelection(to location: Int) -> NSRange {
         guard let selectionOrigin else {
             return NSRange(location: location, length: 0)

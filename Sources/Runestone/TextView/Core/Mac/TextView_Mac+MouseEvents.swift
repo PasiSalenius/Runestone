@@ -10,15 +10,20 @@ public extension TextView {
 
         // Check for Shift modifier to extend selection
         if event.modifierFlags.contains(.shift) {
-            self.extendSelectionOnShiftClick(to: location)
-        } else if event.clickCount == 1 {
-            textViewController.move(to: location)
-            textViewController.startDraggingSelection(from: location)
+            // Shift is held: always extend selection, regardless of click count
+            extendSelectionOnShiftClick(to: location)
+            // Start autoscroll timer so user can continue dragging to extend further
             startAutoscrollTimer()
-        } else if event.clickCount == 2 {
-            textViewController.selectWord(at: location)
-        } else if event.clickCount == 3 {
-            textViewController.selectLine(at: location)
+        } else {
+            if event.clickCount == 1 {
+                textViewController.move(to: location)
+                textViewController.startDraggingSelection(from: location)
+                startAutoscrollTimer()
+            } else if event.clickCount == 2 {
+                textViewController.selectWord(at: location)
+            } else if event.clickCount == 3 {
+                textViewController.selectLine(at: location)
+            }
         }
     }
 
@@ -39,8 +44,7 @@ public extension TextView {
     override func mouseUp(with event: NSEvent) {
         super.mouseUp(with: event)
         stopAutoscrollTimer()
-        // Don't extend drag selection if shift was held (shift+click handles selection differently)
-        if event.clickCount == 1 && !event.modifierFlags.contains(.shift) {
+        if event.clickCount == 1 {
             let location = locationClosestToPoint(in: event)
             textViewController.extendDraggedSelection(to: location)
         }
@@ -90,8 +94,9 @@ public extension TextView {
 
         textViewController.selectedRange = newRange
 
-        // Don't start drag timer for Shift+Click
-        // User might click again to further extend selection
+        // Update selection origin so that if user continues dragging,
+        // it extends from the correct anchor point (like TextEdit)
+        textViewController.updateDragOrigin(to: anchor)
     }
 }
 

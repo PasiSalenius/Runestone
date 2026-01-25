@@ -64,6 +64,10 @@ extension TextViewController {
         selectedRange = selectionService.rangeByStartDraggingSelection(from: location)
     }
 
+    func updateDragOrigin(to location: Int) {
+        selectionService.updateDragOrigin(to: location)
+    }
+
     func extendDraggedSelection(to location: Int) {
         selectedRange = selectionService.rangeByExtendingDraggedSelection(to: location)
     }
