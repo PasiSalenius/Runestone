@@ -73,11 +73,20 @@ extension TextViewController {
     }
 
     func selectWord(at location: Int) {
-        selectedRange = selectionService.rangeBySelectingWord(at: location)
+        let range = selectionService.rangeBySelectingWord(at: location)
+        // Ensure the entire word is laid out before setting selection
+        // This is especially important for long words that might wrap
+        layoutManager.layoutLines(toLocation: range.upperBound)
+        selectedRange = range
     }
 
     func selectLine(at location: Int) {
-        selectedRange = selectionService.rangeBySelectingLine(at: location)
+        let range = selectionService.rangeBySelectingLine(at: location)
+        // Ensure the entire line is laid out before setting selection
+        // This fixes an issue where only the visible portion of a wrapped line
+        // would be highlighted until scrolling forced layout
+        layoutManager.layoutLines(toLocation: range.upperBound)
+        selectedRange = range
     }
 
     func movePageUpAndModifySelection() {
