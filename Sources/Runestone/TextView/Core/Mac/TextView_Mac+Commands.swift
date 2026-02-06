@@ -69,11 +69,20 @@ public extension TextView {
     /// Inserts a tab character.
     override func insertTab(_ sender: Any?) {
         guard isEditable else {
+            window?.selectNextKeyView(self)
             return
         }
         let indentString = indentStrategy.string(indentLevel: 1)
         if textViewController.shouldChangeText(in: textViewController.rangeForInsertingText, replacementText: indentString) {
             textViewController.replaceText(in: textViewController.rangeForInsertingText, with: indentString)
+        }
+    }
+
+    /// Handles Shift+Tab.
+    override func insertBacktab(_ sender: Any?) {
+        guard isEditable else {
+            window?.selectPreviousKeyView(self)
+            return
         }
     }
 
