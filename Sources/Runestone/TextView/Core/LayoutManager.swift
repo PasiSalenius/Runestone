@@ -504,14 +504,16 @@ extension LayoutManager {
         let lineController = lineControllerStorage.getOrCreateLineController(for: line)
         let fontLineHeight = theme.lineNumberFont.lineHeight
         let xPosition = safeAreaInsets.left + gutterWidthService.gutterLeadingPadding
-        var yPosition = textContainerInset.top + line.yPosition
-        if lineController.numberOfLineFragments > 1 {
-            // There are more than one line fragments, so we align the line number at the top.
-            yPosition += (fontLineHeight * lineHeightMultiplier - fontLineHeight) / 2
+        // Align the line number baseline with the text baseline of the first line fragment.
+        let textBaselineY: CGFloat
+        if let fragment = lineController.firstLineFragment {
+            textBaselineY = (fragment.scaledSize.height - fragment.baseSize.height) / 2 + fragment.baseSize.height - fragment.descent
         } else {
-            // There's a single line fragment, so we center the line number in the height of the line.
-            yPosition += (lineController.lineHeight - fontLineHeight) / 2
+            let totalLineHeight = theme.font.totalLineHeight
+            let scaledHeight = totalLineHeight * lineHeightMultiplier
+            textBaselineY = (scaledHeight - totalLineHeight) / 2 + theme.font.ascender
         }
+        let yPosition = textContainerInset.top + line.yPosition + textBaselineY - theme.lineNumberFont.ascender
         lineNumberView.text = "\(line.index + 1)"
         lineNumberView.font = theme.lineNumberFont
         lineNumberView.textColor = theme.lineNumberColor

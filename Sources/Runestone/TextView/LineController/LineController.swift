@@ -85,6 +85,9 @@ final class LineController {
     var numberOfLineFragments: Int {
         typesetter.lineFragments.count
     }
+    var firstLineFragment: LineFragment? {
+        typesetter.lineFragments.first
+    }
     var isFinishedTypesetting: Bool {
         typesetter.isFinishedTypesetting
     }
