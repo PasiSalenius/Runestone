@@ -54,14 +54,22 @@ public extension TextView {
         textViewController.moveRightAndModifySelection()
     }
 
-    /// Move the insertion pointer to the beginning of the document.
+    /// Scroll to or move the insertion pointer to the beginning of the document.
     override func scrollToBeginningOfDocument(_ sender: Any?) {
-        textViewController.moveToBeginningOfDocument()
+        if isEditable {
+            textViewController.moveToBeginningOfDocument()
+        } else {
+            textViewController.scrollToTop()
+        }
     }
 
     /// Move the insertion pointer to the beginning of the document.
     override func moveToBeginningOfDocument(_ sender: Any?) {
-        textViewController.moveToBeginningOfDocument()
+        if isEditable {
+            textViewController.moveToBeginningOfDocument()
+        } else {
+            textViewController.scrollToTop()
+        }
     }
 
     /// Move the selection to include the beginning of the document.
@@ -89,14 +97,22 @@ public extension TextView {
         textViewController.moveToBeginningOfParagraphAndModifySelection()
     }
 
-    /// Move the insertion pointer to the end of the document.
+    /// Scroll to or move the insertion pointer to the end of the document.
     override func scrollToEndOfDocument(_ sender: Any?) {
-        textViewController.moveToEndOfDocument()
+        if isEditable {
+            textViewController.moveToEndOfDocument()
+        } else {
+            textViewController.scrollToBottom()
+        }
     }
 
     /// Move the insertion pointer to the end of the document.
     override func moveToEndOfDocument(_ sender: Any?) {
-        textViewController.moveToEndOfDocument()
+        if isEditable {
+            textViewController.moveToEndOfDocument()
+        } else {
+            textViewController.scrollToBottom()
+        }
     }
 
     /// Move the selection to include the end of the document.
@@ -180,12 +196,20 @@ public extension TextView {
 
     /// Move the insertion pointer up one page.
     override func scrollPageUp(_ sender: Any?) {
-        textViewController.movePageUp()
+        if isEditable {
+            textViewController.movePageUp()
+        } else {
+            textViewController.scrollPageUp()
+        }
     }
 
     /// Move the insertion pointer down one page.
     override func scrollPageDown(_ sender: Any?) {
-        textViewController.movePageDown()
+        if isEditable {
+            textViewController.movePageDown()
+        } else {
+            textViewController.scrollPageDown()
+        }
     }
 
     /// Extend the selection up one page.

@@ -76,6 +76,28 @@ extension TextViewController {
         scrollView.contentOffset = CGPoint(x: offset.x, y: newY)
     }
 
+    func scrollPageUp() {
+        let offset = scrollView.contentOffset
+        let newY = max(offset.y - calculatePageHeight(), scrollView.minimumContentOffset.y)
+        scrollView.contentOffset = CGPoint(x: offset.x, y: newY)
+    }
+
+    func scrollPageDown() {
+        let offset = scrollView.contentOffset
+        let newY = min(offset.y + calculatePageHeight(), scrollView.maximumContentOffset.y)
+        scrollView.contentOffset = CGPoint(x: offset.x, y: newY)
+    }
+
+    func scrollToTop() {
+        let offset = scrollView.contentOffset
+        scrollView.contentOffset = CGPoint(x: offset.x, y: scrollView.minimumContentOffset.y)
+    }
+
+    func scrollToBottom() {
+        let offset = scrollView.contentOffset
+        scrollView.contentOffset = CGPoint(x: offset.x, y: scrollView.maximumContentOffset.y)
+    }
+
     func movePageUp() {
         guard let selectedRange = selectedRange else {
             return
