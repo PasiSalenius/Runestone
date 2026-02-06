@@ -44,10 +44,18 @@ extension TextViewController {
         scrollView.hasHorizontalScroller = scrollView.contentSize.width > scrollView.frame.width
         scrollView.horizontalScroller?.layer?.zPosition = 1_000
         scrollView.verticalScroller?.layer?.zPosition = 1_000
+        let oldVerticalScrollerWidth = layoutManager.verticalScrollerWidth
         layoutManager.verticalScrollerWidth = scrollView.verticalScrollerWidth
         contentSizeService.verticalScrollerWidth = scrollView.verticalScrollerWidth
         if scrollView.hasVerticalScroller != hadVerticalScroller || scrollView.hasHorizontalScroller != hadHorizontalScroller {
             textView.setNeedsLayout()
+        }
+        if layoutManager.verticalScrollerWidth != oldVerticalScrollerWidth && isLineWrappingEnabled {
+            for lineController in lineControllerStorage {
+                lineController.invalidateTypesetting()
+            }
+            contentSizeService.invalidateContentSize()
+            layoutManager.setNeedsLayout()
         }
     }
     #endif
@@ -56,7 +64,10 @@ extension TextViewController {
 #if os(macOS)
 private extension MultiPlatformScrollView {
     var verticalScrollerWidth: CGFloat {
-        hasVerticalScroller ? verticalScroller?.frame.width ?? 0 : 0
+        guard hasVerticalScroller, scrollerStyle != .overlay else {
+            return 0
+        }
+        return verticalScroller?.frame.width ?? 0
     }
 }
 #endif
