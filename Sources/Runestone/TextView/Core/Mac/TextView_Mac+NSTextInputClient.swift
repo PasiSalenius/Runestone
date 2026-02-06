@@ -4,9 +4,6 @@ import AppKit
 extension TextView: NSTextInputClient {
     // swiftlint:disable:next prohibited_super_call
     override public func doCommand(by selector: Selector) {
-        guard isEditable else {
-            return
-        }
         super.doCommand(by: selector)
     }
 

@@ -564,7 +564,7 @@ final class TextViewController {
     var preserveUndoStackWhenSettingString = false
     private(set) var maximumLeadingCharacterPairComponentLength = 0
 
-    private var estimatedLineHeight: CGFloat {
+    var estimatedLineHeight: CGFloat {
         theme.font.totalLineHeight * lineHeightMultiplier
     }
     private var cancellables: Set<AnyCancellable> = []

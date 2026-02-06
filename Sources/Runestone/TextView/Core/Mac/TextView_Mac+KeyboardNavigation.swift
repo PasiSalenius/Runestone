@@ -12,7 +12,11 @@ public extension TextView {
 
     /// Moves the insertion pointer down in the current content.
     override func moveDown(_ sender: Any?) {
-        textViewController.moveDown()
+        if isEditable {
+            textViewController.moveDown()
+        } else {
+            textViewController.scrollLineDown()
+        }
     }
 
     /// Extends the selection to include the content below the current selection.
@@ -122,7 +126,11 @@ public extension TextView {
 
     /// Moves the insertion pointer up in the current content.
     override func moveUp(_ sender: Any?) {
-        textViewController.moveUp()
+        if isEditable {
+            textViewController.moveUp()
+        } else {
+            textViewController.scrollLineUp()
+        }
     }
 
     /// Extends the selection to include the content above the current selection.
