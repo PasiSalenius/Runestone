@@ -2,7 +2,11 @@
 public extension TextView {
     /// Moves the insertion pointer backward in the current content.
     override func moveBackward(_ sender: Any?) {
-        textViewController.moveLeft()
+        if isEditable {
+            textViewController.moveLeft()
+        } else {
+            textViewController.scrollLeft()
+        }
     }
 
     /// Extends the selection to include the content before the current selection.
@@ -26,7 +30,11 @@ public extension TextView {
 
     /// Moves the insertion pointer forward in the current content.
     override func moveForward(_ sender: Any?) {
-        textViewController.moveRight()
+        if isEditable {
+            textViewController.moveRight()
+        } else {
+            textViewController.scrollRight()
+        }
     }
 
     /// Extends the selection to include the content below the current selection.
@@ -36,7 +44,11 @@ public extension TextView {
 
     /// Moves the insertion pointer left in the current content.
     override func moveLeft(_ sender: Any?) {
-        textViewController.moveLeft()
+        if isEditable {
+            textViewController.moveLeft()
+        } else {
+            textViewController.scrollLeft()
+        }
     }
 
     /// Extends the selection to include the content to the left of the current selection.
@@ -46,7 +58,11 @@ public extension TextView {
 
     /// Moves the insertion pointer right in the current content.
     override func moveRight(_ sender: Any?) {
-        textViewController.moveRight()
+        if isEditable {
+            textViewController.moveRight()
+        } else {
+            textViewController.scrollRight()
+        }
     }
 
     /// Extends the selection to include the content to the right of the current selection.

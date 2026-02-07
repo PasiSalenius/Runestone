@@ -64,6 +64,18 @@ extension TextViewController {
         selectedRange = NSRange(location: location, length: 0)
     }
 
+    func scrollLeft() {
+        let offset = scrollView.contentOffset
+        let newX = max(offset.x - estimatedLineHeight, scrollView.minimumContentOffset.x)
+        scrollView.contentOffset = CGPoint(x: newX, y: offset.y)
+    }
+
+    func scrollRight() {
+        let offset = scrollView.contentOffset
+        let newX = min(offset.x + estimatedLineHeight, scrollView.maximumContentOffset.x)
+        scrollView.contentOffset = CGPoint(x: newX, y: offset.y)
+    }
+
     func scrollLineUp() {
         let offset = scrollView.contentOffset
         let newY = max(offset.y - estimatedLineHeight, scrollView.minimumContentOffset.y)
