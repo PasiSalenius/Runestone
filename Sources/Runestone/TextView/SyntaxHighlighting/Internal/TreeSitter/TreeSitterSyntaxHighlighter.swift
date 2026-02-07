@@ -84,6 +84,13 @@ private extension TreeSitterSyntaxHighlighter {
     private func setAttributes(for tokens: [TreeSitterSyntaxHighlightToken], on attributedString: NSMutableAttributedString) {
         attributedString.beginEditing()
         for token in tokens {
+            let stringLength = attributedString.length
+            guard token.range.location >= 0,
+                  token.range.location < stringLength,
+                  token.range.location + token.range.length <= stringLength
+            else {
+                continue
+            }
             var attributes: [NSAttributedString.Key: Any] = [:]
             if let foregroundColor = token.textColor {
                 attributes[.foregroundColor] = foregroundColor
