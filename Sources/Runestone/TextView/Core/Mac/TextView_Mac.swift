@@ -21,10 +21,10 @@ open class TextView: NSView, NSMenuItemValidation {
         public let image: NSImage?
         /// An optional keyboard shortcut for menu item.
         public let keyEquivalent: String
-        /// The closure to invoke when the menu item is selected.
-        public let action: () -> Void
+        /// The closure to invoke when the menu item is selected. Receives the currently selected text.
+        public let action: (String) -> Void
 
-        public init(title: String, image: NSImage? = nil, keyEquivalent: String = "", action: @escaping () -> Void) {
+        public init(title: String, image: NSImage? = nil, keyEquivalent: String = "", action: @escaping (String) -> Void) {
             self.title = title
             self.image = image
             self.keyEquivalent = keyEquivalent
@@ -908,7 +908,7 @@ private extension TextView {
             menu?.addItem(.separator())
             menuItemTargets = []
             for item in customMenuItems {
-                let target = MenuItemTarget(handler: item.action)
+                let target = MenuItemTarget(textView: self, handler: item.action)
                 menuItemTargets.append(target)
                 let nsMenuItem = NSMenuItem(
                     title: item.title,
@@ -948,12 +948,17 @@ extension TextView: SearchControllerDelegate {
 }
 
 private class MenuItemTarget: NSObject {
-    let handler: () -> Void
-    init(handler: @escaping () -> Void) {
+    weak var textView: TextView?
+    let handler: (String) -> Void
+    init(textView: TextView, handler: @escaping (String) -> Void) {
+        self.textView = textView
         self.handler = handler
     }
     @objc func performAction(_ sender: Any?) {
-        handler()
+        guard let textView else { return }
+        let range = textView.selectedRange()
+        let selectedText = textView.text(in: range) ?? ""
+        handler(selectedText)
     }
 }
 #endif
