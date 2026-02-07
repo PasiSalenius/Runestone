@@ -13,8 +13,31 @@ import UniformTypeIdentifiers
 /// When initially configuring the `TextView` with a theme, a language and the text to be shown, it is recommended to use the ``setState(_:addUndoAction:)`` function.
 /// The function takes an instance of ``TextViewState`` as input which can be created on a background queue to avoid blocking the main queue while doing the initial parse of a text.
 open class TextView: NSView, NSMenuItemValidation {
+    /// Describes a custom item to be added to the context menu.
+    public struct MenuItem {
+        /// The title of the menu item.
+        public let title: String
+        /// An optional image displayed next to the title.
+        public let image: NSImage?
+        /// An optional keyboard shortcut for menu item.
+        public let keyEquivalent: String
+        /// The closure to invoke when the menu item is selected.
+        public let action: () -> Void
+
+        public init(title: String, image: NSImage? = nil, keyEquivalent: String = "", action: @escaping () -> Void) {
+            self.title = title
+            self.image = image
+            self.keyEquivalent = keyEquivalent
+            self.action = action
+        }
+    }
+
     /// Delegate to receive callbacks for events triggered by the editor.
     public weak var editorDelegate: TextViewDelegate?
+    /// Custom menu items appended to the end of the context menu.
+    public var customMenuItems: [MenuItem] = [] {
+        didSet { setupMenu() }
+    }
     /// Returns a Boolean value indicating whether this object can become the first responder.
     override public var acceptsFirstResponder: Bool {
         true
@@ -422,6 +445,7 @@ open class TextView: NSView, NSMenuItemValidation {
     private let scrollView = NSScrollView()
     private let caretView = CaretView()
     private let selectionViewReuseQueue = ViewReuseQueue<String, LineSelectionView>()
+    private var menuItemTargets: [MenuItemTarget] = []
     // Autoscroll support for text selection
     var autoscrollTimer: Timer?
     var currentDragEvent: NSEvent?
@@ -870,9 +894,32 @@ private extension TextView {
         menu?.addItem(.separator())
         menu?.addItem(withTitle: L10n.Menu.ItemTitle.selectAll, action: #selector(selectAll(_:)), keyEquivalent: "a")
         menu?.addItem(.separator())
-        menu?.addItem(withTitle: "Find...", action: #selector(showFindPanel(_:)), keyEquivalent: "f")
-        menu?.addItem(withTitle: "Find Next", action: #selector(findNext(_:)), keyEquivalent: "g")
-        menu?.addItem(withTitle: "Find Previous", action: #selector(findPrevious(_:)), keyEquivalent: "G")
+        let findItem = NSMenuItem(title: L10n.Menu.ItemTitle.find, action: #selector(performTextFinderAction(_:)), keyEquivalent: "f")
+        findItem.tag = NSTextFinder.Action.showFindInterface.rawValue
+        findItem.image = NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: nil)
+        menu?.addItem(findItem)
+        let findNextItem = NSMenuItem(title: L10n.Menu.ItemTitle.findNext, action: #selector(performTextFinderAction(_:)), keyEquivalent: "g")
+        findNextItem.tag = NSTextFinder.Action.nextMatch.rawValue
+        menu?.addItem(findNextItem)
+        let findPreviousItem = NSMenuItem(title: L10n.Menu.ItemTitle.findPrevious, action: #selector(performTextFinderAction(_:)), keyEquivalent: "G")
+        findPreviousItem.tag = NSTextFinder.Action.previousMatch.rawValue
+        menu?.addItem(findPreviousItem)
+        if !customMenuItems.isEmpty {
+            menu?.addItem(.separator())
+            menuItemTargets = []
+            for item in customMenuItems {
+                let target = MenuItemTarget(handler: item.action)
+                menuItemTargets.append(target)
+                let nsMenuItem = NSMenuItem(
+                    title: item.title,
+                    action: #selector(MenuItemTarget.performAction(_:)),
+                    keyEquivalent: item.keyEquivalent
+                )
+                nsMenuItem.target = target
+                nsMenuItem.image = item.image
+                menu?.addItem(nsMenuItem)
+            }
+        }
     }
 }
 
@@ -897,6 +944,16 @@ extension TextView: TextViewControllerDelegate {
 extension TextView: SearchControllerDelegate {
     func searchController(_ searchController: SearchController, linePositionAt location: Int) -> LinePosition? {
         textViewController.lineManager.linePosition(at: location)
+    }
+}
+
+private class MenuItemTarget: NSObject {
+    let handler: () -> Void
+    init(handler: @escaping () -> Void) {
+        self.handler = handler
+    }
+    @objc func performAction(_ sender: Any?) {
+        handler()
     }
 }
 #endif

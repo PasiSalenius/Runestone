@@ -2,7 +2,11 @@
 "undo.action_name.replace_all" = "すべて置き換え";
 "undo.action_name.move_lines_up" = "行を上に移動";
 "undo.action_name.move_lines_down" = "行を下に移動";
-"menu.item_title.cut" = "Cut";
-"menu.item_title.copy" = "Copy";
-"menu.item_title.paste" = "Paste";
+"menu.item_title.cut" = "カット";
+"menu.item_title.copy" = "コピー";
+"menu.item_title.paste" = "ペースト";
+"menu.item_title.find" = "検索…";
+"menu.item_title.find_next" = "次を検索";
+"menu.item_title.find_previous" = "前を検索";
 "menu.item_title.replace" = "置換";
+"menu.item_title.select_all" = "すべてを選択";

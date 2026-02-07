@@ -12,16 +12,22 @@ import Foundation
 internal enum L10n {
   internal enum Menu {
     internal enum ItemTitle {
-      /// Paste
-      internal static let copy = L10n.tr("Localizable", "menu.item_title.copy", fallback: "Paste")
+      /// Copy
+      internal static let copy = L10n.tr("Localizable", "menu.item_title.copy", fallback: "Copy")
       /// Cut
       internal static let cut = L10n.tr("Localizable", "menu.item_title.cut", fallback: "Cut")
-      /// Copy
-      internal static let paste = L10n.tr("Localizable", "menu.item_title.paste", fallback: "Copy")
+      /// Find...
+      internal static let find = L10n.tr("Localizable", "menu.item_title.find", fallback: "Find...")
+      /// Find Next
+      internal static let findNext = L10n.tr("Localizable", "menu.item_title.find_next", fallback: "Find Next")
+      /// Find Previous
+      internal static let findPrevious = L10n.tr("Localizable", "menu.item_title.find_previous", fallback: "Find Previous")
+      /// Paste
+      internal static let paste = L10n.tr("Localizable", "menu.item_title.paste", fallback: "Paste")
       /// Replace
       internal static let replace = L10n.tr("Localizable", "menu.item_title.replace", fallback: "Replace")
       /// Select All
-      internal static let selectAll = L10n.tr("Localizable", "menu.item_title.selectAll", fallback: "Select All")
+      internal static let selectAll = L10n.tr("Localizable", "menu.item_title.select_all", fallback: "Select All")
     }
   }
   internal enum Undo {

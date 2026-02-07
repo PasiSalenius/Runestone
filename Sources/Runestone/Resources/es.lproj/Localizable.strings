@@ -2,7 +2,11 @@
 "undo.action_name.replace_all" = "Reemplazar todo";
 "undo.action_name.move_lines_up" = "Mover líneas hacia arriba";
 "undo.action_name.move_lines_down" = "Mover líneas hacia abajo";
-"menu.item_title.cut" = "Cut";
-"menu.item_title.copy" = "Copy";
-"menu.item_title.paste" = "Paste";
+"menu.item_title.cut" = "Cortar";
+"menu.item_title.copy" = "Copiar";
+"menu.item_title.paste" = "Pegar";
+"menu.item_title.find" = "Buscar…";
+"menu.item_title.find_next" = "Buscar siguiente";
+"menu.item_title.find_previous" = "Buscar anterior";
 "menu.item_title.replace" = "Reemplazar";
+"menu.item_title.select_all" = "Seleccionar todo";
