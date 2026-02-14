@@ -33,14 +33,19 @@ enum TreeSitterPredicateMapper {
 
 private extension TreeSitterPredicateMapper {
     private static func properties(fromSetSteps steps: [TreeSitterPredicate.Step]) -> (name: String, value: String) {
-        guard steps.count == 2 else {
-            fatalError("Set predicate must contain exactly two steps.")
-        }
-        switch (steps[0], steps[1]) {
-        case let (.string(name), .string(value)):
-            return (name, value)
-        default:
+        switch steps.count {
+        case 1:
+            if case let .string(name) = steps[0] {
+                return (name, "true")
+            }
+            fatalError("Set predicate must contain a string step.")
+        case 2:
+            if case let (.string(name), .string(value)) = (steps[0], steps[1]) {
+                return (name, value)
+            }
             fatalError("Set predicate must contain exactly two string steps.")
+        default:
+            fatalError("Set predicate must contain one or two steps.")
         }
     }
 
