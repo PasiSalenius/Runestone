@@ -13,7 +13,7 @@ let package = Package(
         .library(name: "Runestone", targets: ["Runestone"])
     ],
     dependencies: [
-        .package(url: "https://github.com/tree-sitter/tree-sitter", .upToNextMinor(from: "0.20.9"))
+        .package(url: "https://github.com/tree-sitter/tree-sitter", .upToNextMajor(from: "0.20.9"))
     ],
     targets: [
         .target(name: "Runestone", dependencies: [
@@ -23,7 +23,8 @@ let package = Package(
             .process("TextView/Appearance/Theme.xcassets")
         ]),
         .target(name: "TestTreeSitterLanguages", cSettings: [
-            .unsafeFlags(["-w"])
+            .unsafeFlags(["-w"]),
+            .headerSearchPath("src")
         ]),
         .testTarget(name: "RunestoneTests", dependencies: [
             "Runestone",

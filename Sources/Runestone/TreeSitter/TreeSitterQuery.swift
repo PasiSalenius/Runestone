@@ -6,18 +6,19 @@ enum TreeSitterQueryError: Error {
     case field(offset: UInt32)
     case capture(offset: UInt32)
     case structure(offset: UInt32)
+    case language(offset: UInt32)
     case unknown
 }
 
 final class TreeSitterQuery {
     let pointer: OpaquePointer
 
-    private let language: UnsafePointer<TSLanguage>
+    private let language: OpaquePointer
     private var patternCount: UInt32 {
         ts_query_pattern_count(pointer)
     }
 
-    init(source: String, language: UnsafePointer<TSLanguage>) throws {
+    init(source: String, language: OpaquePointer) throws {
         let errorOffset = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         let errorType = UnsafeMutablePointer<TSQueryError>.allocate(capacity: 1)
         let pointer = source.withCString { cstr in
@@ -38,6 +39,8 @@ final class TreeSitterQuery {
             throw TreeSitterQueryError.capture(offset: errorOffset.pointee)
         case 5:
             throw TreeSitterQueryError.structure(offset: errorOffset.pointee)
+        case 6:
+            throw TreeSitterQueryError.language(offset: errorOffset.pointee)
         default:
             if let pointer = pointer {
                 self.language = language
