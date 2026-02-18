@@ -348,7 +348,12 @@ extension LayoutManager {
             return
         }
         let totalGutterWidth = safeAreaInsets.left + gutterWidthService.gutterWidth
+        #if os(iOS)
         gutterSelectionBackgroundView.frame = CGRect(x: 0, y: rect.minY, width: totalGutterWidth, height: rect.height)
+        #else
+        // Adjust y-offset on macOS to make it scroll as it is not a child of the scroll view.
+        gutterSelectionBackgroundView.frame = CGRect(x: 0, y: rect.minY + viewport.minY * -1, width: totalGutterWidth, height: rect.height)
+        #endif
         #if os(iOS)
         // Adjust x-offset to make it appear static as it is added to the scroll view.
         let lineSelectionBackgroundOrigin = CGPoint(x: viewport.minX + totalGutterWidth, y: rect.minY)
