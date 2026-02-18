@@ -548,12 +548,15 @@ extension LayoutManager {
 
     private func updateLineNumberColors() {
         let visibleViews = lineNumberLabelReuseQueue.visibleViews
-        let selectionFrame = gutterSelectionBackgroundView.frame
-        let isSelectionVisible = !gutterSelectionBackgroundView.isHidden
+        // Use the document-space selection rect rather than gutterSelectionBackgroundView.frame,
+        // which may include a viewport offset on macOS. Line number views are positioned in
+        // document coordinates within lineNumbersContainerView, so we need to compare in the same space.
+        let selectionRect = getLineSelectionRect()
+        let isSelectionVisible = !gutterSelectionBackgroundView.isHidden && selectionRect != nil
         for (_, lineNumberView) in visibleViews {
-            if isSelectionVisible {
+            if isSelectionVisible, let selectionRect {
                 let lineNumberFrame = lineNumberView.frame
-                let isInSelection = lineNumberFrame.midY >= selectionFrame.minY && lineNumberFrame.midY <= selectionFrame.maxY
+                let isInSelection = lineNumberFrame.midY >= selectionRect.minY && lineNumberFrame.midY <= selectionRect.maxY
                 lineNumberView.textColor = isInSelection && isEditing ? theme.selectedLinesLineNumberColor : theme.lineNumberColor
             } else {
                 lineNumberView.textColor = theme.lineNumberColor
