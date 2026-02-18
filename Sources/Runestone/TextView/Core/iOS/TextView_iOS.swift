@@ -596,7 +596,11 @@ open class TextView: UIScrollView {
             handleTextSelectionChange()
         }
         textViewController.handleContentSizeUpdateIfNeeded()
-        textViewController.viewport = CGRect(origin: contentOffset, size: frame.size)
+        var viewportHeight = frame.size.height
+        if let presentationHeight = layer.presentation()?.bounds.height, presentationHeight > viewportHeight {
+            viewportHeight = presentationHeight
+        }
+        textViewController.viewport = CGRect(origin: contentOffset, size: CGSize(width: frame.size.width, height: viewportHeight))
         textViewController.layoutManager.bringGutterToFront()
         // Setting the frame of the text selection view fixes a bug where UIKit assigns an incorrect
         // Y-position to the selection rects the first time the user selects text.
