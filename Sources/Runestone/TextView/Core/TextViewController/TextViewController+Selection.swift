@@ -143,9 +143,10 @@ private extension TextViewController {
         if let selectedRange {
             let newRange = selectionService.range(moving: selectedRange, by: granularity, inDirection: direction)
             self.selectedRange = newRange
-            // Scroll to keep the active selection endpoint visible
-            // When extending backward, the lowerBound is moving; when extending forward, the upperBound is moving
-            let locationToScroll = direction == .backward ? newRange.lowerBound : newRange.upperBound
+            // Scroll to the endpoint that actually changed (the active selection endpoint).
+            // Using the movement direction is incorrect because shrinking a selection moves
+            // in the opposite direction from how it was extended.
+            let locationToScroll = activeEndpoint(oldRange: selectedRange, newRange: newRange)
             scrollLocationToVisible(locationToScroll)
         }
     }
@@ -154,9 +155,16 @@ private extension TextViewController {
         if let selectedRange {
             let newRange = selectionService.range(moving: selectedRange, toBoundary: boundary, inDirection: direction)
             self.selectedRange = newRange
-            // Scroll to keep the active selection endpoint visible
-            let locationToScroll = direction == .backward ? newRange.lowerBound : newRange.upperBound
+            let locationToScroll = activeEndpoint(oldRange: selectedRange, newRange: newRange)
             scrollLocationToVisible(locationToScroll)
+        }
+    }
+
+    private func activeEndpoint(oldRange: NSRange, newRange: NSRange) -> Int {
+        if newRange.lowerBound != oldRange.lowerBound {
+            return newRange.lowerBound
+        } else {
+            return newRange.upperBound
         }
     }
 }
