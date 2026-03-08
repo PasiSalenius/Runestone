@@ -530,6 +530,9 @@ open class TextView: UIScrollView {
     // https://steveshepard.com/blog/adventures-with-uitextinteraction/
     private var textRangeAdjustmentGestureRecognizers: Set<UIGestureRecognizer> = []
     private var previousSelectedRangeDuringGestureHandling: NSRange?
+    private var autoscrollTimer: Timer?
+    private var autoscrollDirection: AutoscrollDirection?
+    private var previousSelectedRangeDuringSelectionChange: NSRange?
     private var isPerformingNonEditableTextInteraction = false
     private var shouldBeginEditing: Bool {
         guard isEditable else {
@@ -1155,18 +1158,27 @@ private extension TextView {
     }
 
     @objc private func handleTextRangeAdjustmentPan(_ gestureRecognizer: UIPanGestureRecognizer) {
-        // This function scroll the text view when the selected range is adjusted.
-        if gestureRecognizer.state == .began {
+        switch gestureRecognizer.state {
+        case .began:
             previousSelectedRangeDuringGestureHandling = selectedRange
-        } else if gestureRecognizer.state == .changed, let previousSelectedRange = previousSelectedRangeDuringGestureHandling {
-            if selectedRange.lowerBound != previousSelectedRange.lowerBound {
-                // User is adjusting the lower bound (location) of the selected range.
-                textViewController.scrollLocationToVisible(selectedRange.lowerBound)
-            } else if selectedRange.upperBound != previousSelectedRange.upperBound {
-                // User is adjusting the upper bound (length) of the selected range.
-                textViewController.scrollLocationToVisible(selectedRange.upperBound)
+            startAutoscrollTimer()
+        case .changed:
+            if let previousSelectedRange = previousSelectedRangeDuringGestureHandling {
+                if selectedRange.lowerBound != previousSelectedRange.lowerBound {
+                    textViewController.scrollLocationToVisible(selectedRange.lowerBound)
+                } else if selectedRange.upperBound != previousSelectedRange.upperBound {
+                    textViewController.scrollLocationToVisible(selectedRange.upperBound)
+                }
+                previousSelectedRangeDuringGestureHandling = selectedRange
             }
-            previousSelectedRangeDuringGestureHandling = selectedRange
+            // Update autoscroll direction based on touch position relative to viewport edges
+            let touchPoint = gestureRecognizer.location(in: self)
+            autoscrollDirection = autoscrollDirection(for: touchPoint)
+        case .ended, .cancelled:
+            stopAutoscrollTimer()
+            previousSelectedRangeDuringGestureHandling = nil
+        default:
+            break
         }
     }
 
@@ -1211,9 +1223,80 @@ private extension TextView {
     }
 
     private func scrollToVisibleLocationIfNeeded() {
-        if isAutomaticScrollEnabled, let newRange = textViewController.selectedRange, newRange.length == 0 {
-            textViewController.scrollLocationToVisible(newRange.location, applyScrollPadding: false)
+        guard isAutomaticScrollEnabled, let newRange = textViewController.selectedRange else {
+            return
         }
+        if newRange.length == 0 {
+            textViewController.scrollLocationToVisible(newRange.location, applyScrollPadding: false)
+        } else if autoscrollTimer == nil {
+            // When extending a selection via keyboard (shift+arrow), scroll the moving endpoint into view.
+            // Skip this when the autoscroll timer is active, as the timer handles scrolling during touch drags.
+            if let previousRange = previousSelectedRangeDuringSelectionChange {
+                let locationToScroll: Int
+                if newRange.lowerBound != previousRange.lowerBound {
+                    locationToScroll = newRange.lowerBound
+                } else {
+                    locationToScroll = newRange.upperBound
+                }
+                textViewController.scrollLocationToVisible(locationToScroll)
+            }
+        }
+        previousSelectedRangeDuringSelectionChange = newRange
+    }
+}
+
+// MARK: - Autoscroll
+private extension TextView {
+    enum AutoscrollDirection {
+        case up
+        case down
+    }
+
+    private func startAutoscrollTimer() {
+        stopAutoscrollTimer()
+        autoscrollTimer = Timer.scheduledTimer(
+            withTimeInterval: 0.1,
+            repeats: true
+        ) { [weak self] _ in
+            self?.performAutoscroll()
+        }
+    }
+
+    private func stopAutoscrollTimer() {
+        autoscrollTimer?.invalidate()
+        autoscrollTimer = nil
+        autoscrollDirection = nil
+    }
+
+    private func performAutoscroll() {
+        guard let direction = autoscrollDirection else {
+            return
+        }
+        let offset = contentOffset
+        let scrollAmount = textViewController.estimatedLineHeight
+        let newY: CGFloat
+        switch direction {
+        case .up:
+            newY = max(offset.y - scrollAmount, minimumContentOffset.y)
+        case .down:
+            newY = min(offset.y + scrollAmount, maximumContentOffset.y)
+        }
+        guard newY != offset.y else {
+            return
+        }
+        contentOffset = CGPoint(x: offset.x, y: newY)
+    }
+
+    private func autoscrollDirection(for touchPoint: CGPoint) -> AutoscrollDirection? {
+        let edgeInset: CGFloat = 40
+        // Convert from content coordinates to viewport coordinates
+        let viewportY = touchPoint.y - contentOffset.y
+        if viewportY < adjustedContentInset.top + edgeInset {
+            return .up
+        } else if viewportY > bounds.height - adjustedContentInset.bottom - edgeInset {
+            return .down
+        }
+        return nil
     }
 }
 
