@@ -242,7 +242,7 @@ public extension TextView {
             textContainerInset: textContainerInset,
             lineHeightMultiplier: lineHeightMultiplier
         )
-        return selectionRectFactory.selectionRects(in: indexedRange.range)
+        return selectionRectFactory.selectionRects(in: indexedRange.range.nonNegativeLength)
     }
 }
 
@@ -447,7 +447,7 @@ public extension TextView {
         guard let indexedRange = range as? IndexedRange else {
             fatalError("Expected range to be of type \(IndexedRange.self)")
         }
-        return textViewController.layoutManager.firstRect(for: indexedRange.range)
+        return textViewController.layoutManager.firstRect(for: indexedRange.range.nonNegativeLength)
     }
 
     /// Returns the position in a document that is closest to a specified point.
