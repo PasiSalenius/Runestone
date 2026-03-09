@@ -216,6 +216,13 @@ final class TextViewController {
         }
     }
     var characterPairTrailingComponentDeletionMode: CharacterPairTrailingComponentDeletionMode = .disabled
+    var wordSelectionConnectorCharacters = CharacterSet() {
+        didSet {
+            #if os(macOS)
+            selectionService.wordSelectionConnectorCharacters = wordSelectionConnectorCharacters
+            #endif
+        }
+    }
     var showLineNumbers = false {
         didSet {
             if showLineNumbers != oldValue {

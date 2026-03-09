@@ -10,6 +10,7 @@ final class SelectionService {
             }
         }
     }
+    var wordSelectionConnectorCharacters = CharacterSet()
 
     private struct BracketPair {
         let opening: String
@@ -141,10 +142,6 @@ final class SelectionService {
         if let scalar = Unicode.Scalar(character), CharacterSet.whitespaces.contains(scalar) {
             return rangeOfWhitespace(matching: character, at: location)
         } else if CharacterSet.alphanumerics.containsAllCharacters(of: substring) || isWordConnector(substring) {
-            // Include periods, dashes, percent signs, underscores, colons, and dollar signs as word characters
-            // This allows selecting version numbers (4.39.0), URL paths (consent-status),
-            // URL-encoded strings (%7B%22gdpr%22), identifiers (user_name), URLs with ports (localhost:8080),
-            // and shell variables ($PATH) as single words
             return rangeOfExtendedWord(at: location)
         } else if let selectableSymbol = selectableSymbols.first(where: { $0 == substring }) {
             return NSRange(location: location, length: selectableSymbol.count)
@@ -180,8 +177,7 @@ private extension SelectionService {
     }
 
     private func isWordConnector(_ substring: String) -> Bool {
-        // Treat periods, dashes, percent signs, underscores, colons, and dollar signs as word connectors
-        return substring == "." || substring == "-" || substring == "%" || substring == "_" || substring == ":" || substring == "$"
+        !wordSelectionConnectorCharacters.isEmpty && CharacterSet(charactersIn: substring).isSubset(of: wordSelectionConnectorCharacters)
     }
 
     private func isExtendedWordCharacter(at location: Int) -> Bool {
