@@ -4,6 +4,7 @@ import UIKit
 final class TextInputStringTokenizer: UITextInputStringTokenizer {
     var lineManager: LineManager
     var stringView: StringView
+    var wordSelectionConnectorCharacters = CharacterSet()
     // Used to ensure we can workaround bug where multi-stage input, like when entering Korean text
     // does not work properly. If we do not treat navigation between word boundies as a special case then
     // navigating with Shift + Option + Arrow Keys followed by Shift + Arrow Keys will not work correctly.
@@ -46,6 +47,7 @@ final class TextInputStringTokenizer: UITextInputStringTokenizer {
             return super.position(from: position, toBoundary: granularity, inDirection: direction)
         }
     }
+
 }
 
 // MARK: - Lines
@@ -169,20 +171,30 @@ private extension TextInputStringTokenizer {
 
 // MARK: - Words
 private extension TextInputStringTokenizer {
+    private func isExtendedWordCharacter(_ character: Character) -> Bool {
+        let alphanumerics = CharacterSet.alphanumerics
+        if alphanumerics.contains(character) {
+            return true
+        }
+        if !wordSelectionConnectorCharacters.isEmpty && wordSelectionConnectorCharacters.contains(character) {
+            return true
+        }
+        return false
+    }
+
     private func isPosition(_ position: UITextPosition, atWordBoundaryInDirection direction: UITextDirection) -> Bool {
         guard let indexedPosition = position as? IndexedPosition else {
             return false
         }
         let location = indexedPosition.index
-        let alphanumerics = CharacterSet.alphanumerics
         if direction.isForward {
             if location == 0 {
                 return false
             } else if let previousCharacter = stringView.character(at: location - 1) {
                 if location == stringView.string.length {
-                    return alphanumerics.contains(previousCharacter)
+                    return isExtendedWordCharacter(previousCharacter)
                 } else if let character = stringView.character(at: location) {
-                    return alphanumerics.contains(previousCharacter) && !alphanumerics.contains(character)
+                    return isExtendedWordCharacter(previousCharacter) && !isExtendedWordCharacter(character)
                 } else {
                     return false
                 }
@@ -194,9 +206,9 @@ private extension TextInputStringTokenizer {
                 return false
             } else if let character = stringView.character(at: location) {
                 if location == 0 {
-                    return alphanumerics.contains(character)
+                    return isExtendedWordCharacter(character)
                 } else if let previousCharacter = stringView.character(at: location - 1) {
-                    return alphanumerics.contains(character) && !alphanumerics.contains(previousCharacter)
+                    return isExtendedWordCharacter(character) && !isExtendedWordCharacter(previousCharacter)
                 } else {
                     return false
                 }
@@ -213,19 +225,17 @@ private extension TextInputStringTokenizer {
         }
         didCallPositionFromPositionToWordBoundary = true
         let location = indexedPosition.index
-        let alphanumerics = CharacterSet.alphanumerics
         if direction.isForward {
             if location == stringView.string.length {
                 return position
             } else if let referenceCharacter = stringView.character(at: location) {
-                let isReferenceCharacterAlphanumeric = alphanumerics.contains(referenceCharacter)
+                let isReferenceExtendedWord = isExtendedWordCharacter(referenceCharacter)
                 var currentIndex = location + 1
                 while currentIndex < stringView.string.length {
                     guard let currentCharacter = stringView.character(at: currentIndex) else {
                         break
                     }
-                    let isCurrentCharacterAlphanumeric = alphanumerics.contains(currentCharacter)
-                    if isReferenceCharacterAlphanumeric != isCurrentCharacterAlphanumeric {
+                    if isReferenceExtendedWord != isExtendedWordCharacter(currentCharacter) {
                         break
                     }
                     currentIndex += 1
@@ -238,14 +248,13 @@ private extension TextInputStringTokenizer {
             if location == 0 {
                 return position
             } else if let referenceCharacter = stringView.character(at: location - 1) {
-                let isReferenceCharacterAlphanumeric = alphanumerics.contains(referenceCharacter)
+                let isReferenceExtendedWord = isExtendedWordCharacter(referenceCharacter)
                 var currentIndex = location - 1
                 while currentIndex > 0 {
                     guard let currentCharacter = stringView.character(at: currentIndex) else {
                         break
                     }
-                    let isCurrentCharacterAlphanumeric = alphanumerics.contains(currentCharacter)
-                    if isReferenceCharacterAlphanumeric != isCurrentCharacterAlphanumeric {
+                    if isReferenceExtendedWord != isExtendedWordCharacter(currentCharacter) {
                         currentIndex += 1
                         break
                     }

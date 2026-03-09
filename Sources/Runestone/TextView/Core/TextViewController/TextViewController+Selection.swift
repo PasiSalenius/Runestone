@@ -169,3 +169,40 @@ private extension TextViewController {
     }
 }
 #endif
+
+#if os(iOS)
+import Foundation
+
+extension TextViewController {
+    func rangeBySelectingExtendedWord(at location: Int) -> NSRange? {
+        guard !wordSelectionConnectorCharacters.isEmpty else {
+            return nil
+        }
+        guard location >= 0 && location < stringView.string.length else {
+            return nil
+        }
+        guard let character = stringView.character(at: location), isExtendedWordCharacter(character) else {
+            return nil
+        }
+        var lowerBound = location
+        while lowerBound > 0, let ch = stringView.character(at: lowerBound - 1), isExtendedWordCharacter(ch) {
+            lowerBound -= 1
+        }
+        var upperBound = location
+        while upperBound < stringView.string.length, let ch = stringView.character(at: upperBound), isExtendedWordCharacter(ch) {
+            upperBound += 1
+        }
+        return NSRange(location: lowerBound, length: upperBound - lowerBound)
+    }
+
+    private func isExtendedWordCharacter(_ character: Character) -> Bool {
+        if character.unicodeScalars.allSatisfy({ CharacterSet.alphanumerics.contains($0) }) {
+            return true
+        }
+        if character.unicodeScalars.allSatisfy({ wordSelectionConnectorCharacters.contains($0) }) {
+            return true
+        }
+        return false
+    }
+}
+#endif

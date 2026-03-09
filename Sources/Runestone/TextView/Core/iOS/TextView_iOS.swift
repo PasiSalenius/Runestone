@@ -160,6 +160,20 @@ open class TextView: UIScrollView {
             textViewController.characterPairTrailingComponentDeletionMode = newValue
         }
     }
+    /// Characters that double-tap word selection should extend across.
+    ///
+    /// By default, double-tapping selects a single alphanumeric word. Setting this property allows word selection to extend
+    /// across the specified connector characters. For example, setting this to `CharacterSet(charactersIn: "-")` causes
+    /// double-tapping any part of a UUID like `550e8400-e29b-41d4` to select the entire string including dashes.
+    public var wordSelectionConnectorCharacters: CharacterSet {
+        get {
+            textViewController.wordSelectionConnectorCharacters
+        }
+        set {
+            textViewController.wordSelectionConnectorCharacters = newValue
+            customTokenizer.wordSelectionConnectorCharacters = newValue
+        }
+    }
     /// Enable to show line numbers in the gutter.
     public var showLineNumbers: Bool {
         get {
