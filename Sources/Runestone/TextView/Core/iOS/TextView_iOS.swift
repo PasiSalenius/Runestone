@@ -543,7 +543,7 @@ open class TextView: UIScrollView {
     // The approach is based on the one described in Steve Shephard's blog post "Adventures with UITextInteraction".
     // https://steveshepard.com/blog/adventures-with-uitextinteraction/
     private var textRangeAdjustmentGestureRecognizers: Set<UIGestureRecognizer> = []
-    private var previousSelectedRangeDuringGestureHandling: NSRange?
+    var previousSelectedRangeDuringGestureHandling: NSRange?
     private var autoscrollTimer: Timer?
     private var autoscrollDirection: AutoscrollDirection?
     private var previousSelectedRangeDuringSelectionChange: NSRange?
