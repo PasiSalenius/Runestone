@@ -199,7 +199,14 @@ public extension TextView {
             //
             //    A
             // Placing the character on the second line, which is empty, and double tapping several times on the empty line to select text will cause the editor to crash. To work around this we take the non-negative value of the selected range. Last tested on August 30th, 2022.
-            let newRange = (newValue as? IndexedRange)?.range.nonNegativeLength
+            var newRange = (newValue as? IndexedRange)?.range.nonNegativeLength
+            // When UIKit sets a word selection (length > 0), expand it across connector characters.
+            // Skip expansion when the user is dragging selection handles.
+            if previousSelectedRangeDuringGestureHandling == nil,
+               let range = newRange, range.length > 0,
+               let extended = textViewController.rangeBySelectingExtendedWord(at: range.location) {
+                newRange = extended
+            }
             if newRange != textViewController.selectedRange {
                 notifyDelegateAboutSelectionChangeInLayoutSubviews = true
                 // The logic for determining whether or not to notify the input delegate is based on advice provided by Alexander Blach, developer of Textastic.
