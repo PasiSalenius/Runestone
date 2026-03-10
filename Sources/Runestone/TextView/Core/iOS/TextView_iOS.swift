@@ -650,11 +650,13 @@ open class TextView: UIScrollView {
     /// Notifies this object that it has been asked to relinquish its status as first responder in its window.
     @discardableResult
     override open func resignFirstResponder() -> Bool {
-        guard isEditing && shouldEndEditing else {
-            return false
+        if isEditing {
+            guard shouldEndEditing else {
+                return false
+            }
         }
         let didResignFirstResponder = super.resignFirstResponder()
-        if didResignFirstResponder {
+        if didResignFirstResponder && isEditing {
             didEndEditing()
         }
         return didResignFirstResponder
@@ -695,8 +697,10 @@ open class TextView: UIScrollView {
     ///
     /// - Parameter sender: The object calling this method.
     override open func selectAll(_ sender: Any?) {
+        inputDelegate?.selectionWillChange(self)
         notifyInputDelegateAboutSelectionChangeInLayoutSubviews = true
         selectedRange = NSRange(location: 0, length: textViewController.stringView.string.length)
+        inputDelegate?.selectionDidChange(self)
     }
 
     /// Replace the selected range with the specified text.
@@ -1110,7 +1114,7 @@ private extension TextView {
     }
 
     private func didBeginEditing() {
-        if !isPerformingNonEditableTextInteraction {
+        if isEditable && !isPerformingNonEditableTextInteraction {
             editorDelegate?.textViewDidBeginEditing(self)
         }
     }
@@ -1163,11 +1167,14 @@ private extension TextView {
         let point = gestureRecognizer.location(in: self)
         let oldSelectedRange = selectedRange
         let index = textViewController.layoutManager.closestIndex(to: point)
+        notifyInputDelegateAboutSelectionChangeInLayoutSubviews = true
         selectedRange = NSRange(location: index, length: 0)
         if selectedRange != oldSelectedRange {
             layoutIfNeeded()
         }
-        installEditableInteraction()
+        if isEditable {
+            installEditableInteraction()
+        }
         becomeFirstResponder()
     }
 
@@ -1338,7 +1345,13 @@ extension TextView: SearchControllerDelegate {
 extension TextView: UIGestureRecognizerDelegate {
     override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer === tapGestureRecognizer {
-            return !isEditing && !isDragging && !isDecelerating && shouldBeginEditing
+            if isEditable {
+                return !isEditing && !isDragging && !isDecelerating && shouldBeginEditing
+            } else {
+                // For non-editable views, only handle the initial tap to become first responder.
+                // Once focused, let the non-editable text interaction handle taps (e.g. to deselect).
+                return isSelectable && !isFirstResponder && !isDragging && !isDecelerating
+            }
         } else {
             return super.gestureRecognizerShouldBegin(gestureRecognizer)
         }
