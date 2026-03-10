@@ -130,7 +130,9 @@ public extension TextView {
     ///
     /// - Parameter sender: The object calling this method.
     override func selectAll(_ sender: Any?) {
-        textViewController.selectedRange = NSRange(location: 0, length: textViewController.stringView.string.length)
+        let length = textViewController.stringView.string.length
+        textViewController.layoutManager.layoutLines(toLocation: length)
+        textViewController.selectedRange = NSRange(location: 0, length: length)
     }
 
     /// Performs the undo operations in the last undo group.

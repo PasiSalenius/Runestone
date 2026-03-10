@@ -697,9 +697,14 @@ open class TextView: UIScrollView {
     ///
     /// - Parameter sender: The object calling this method.
     override open func selectAll(_ sender: Any?) {
+        let length = textViewController.stringView.string.length
+        // Force layout of all lines so selection rects cover the entire document.
+        // Without this, lines outside the viewport have estimated heights, causing
+        // the selection to appear truncated for long documents.
+        textViewController.layoutManager.layoutLines(toLocation: length)
         inputDelegate?.selectionWillChange(self)
         notifyInputDelegateAboutSelectionChangeInLayoutSubviews = true
-        selectedRange = NSRange(location: 0, length: textViewController.stringView.string.length)
+        selectedRange = NSRange(location: 0, length: length)
         inputDelegate?.selectionDidChange(self)
     }
 
