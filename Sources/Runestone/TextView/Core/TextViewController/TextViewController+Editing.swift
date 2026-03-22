@@ -20,7 +20,13 @@ extension TextViewController {
         let currentText = text(in: range) ?? ""
         let newRange = NSRange(location: range.location, length: nsNewString.length)
         addUndoOperation(replacing: newRange, withText: currentText, selectedRangeAfterUndo: selectedRangeAfterUndo, actionName: undoActionName)
+        #if os(iOS)
+        textView.inputDelegate?.selectionWillChange(textView)
+        #endif
         selectedRange = NSRange(location: newRange.upperBound, length: 0)
+        #if os(iOS)
+        textView.inputDelegate?.selectionDidChange(textView)
+        #endif
         let textEditHelper = TextEditHelper(stringView: stringView, lineManager: lineManager, lineEndings: lineEndings)
         let textEditResult = textEditHelper.replaceText(in: range, with: newString)
         let textChange = textEditResult.textChange
