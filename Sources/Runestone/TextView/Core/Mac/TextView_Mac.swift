@@ -950,6 +950,7 @@ extension TextView: TextViewControllerDelegate {
         caretView.delayBlinkIfNeeded()
         updateCaretVisibility()
         scrollToVisibleLocationIfNeeded()
+        editorDelegate?.textViewDidChangeSelection(self)
     }
 }
 
