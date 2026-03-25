@@ -1,4 +1,7 @@
 import Foundation
+#if os(macOS)
+import AppKit
+#endif
 
 /// The methods for receiving editing-related messages for the text view.
 public protocol TextViewDelegate: AnyObject {
@@ -101,6 +104,14 @@ public protocol TextViewDelegate: AnyObject {
     ///
     /// The text view will call this method when the user chooses to replace the text in the highlighted range, for example by selecting the action in a [UIMenuController](https://developer.apple.com/documentation/uikit/uimenucontroller).
     func textView(_ textView: TextView, replaceTextIn highlightedRange: HighlightedRange)
+    #if os(macOS)
+    /// Asks the delegate whether it handled the key-down event.
+    /// - Parameters:
+    ///   - textView: The text view that received the key-down event.
+    ///   - event: The key-down event.
+    /// - Returns: `true` if the delegate handled the event; `false` to let the text view handle it normally.
+    func textView(_ textView: TextView, shouldHandleKeyDown event: NSEvent) -> Bool
+    #endif
 }
 
 public extension TextViewDelegate {
@@ -147,4 +158,8 @@ public extension TextViewDelegate {
     }
 
     func textView(_ textView: TextView, replaceTextIn highlightedRange: HighlightedRange) {}
+
+    #if os(macOS)
+    func textView(_ textView: TextView, shouldHandleKeyDown event: NSEvent) -> Bool { false }
+    #endif
 }
