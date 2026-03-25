@@ -78,7 +78,9 @@ extension TextView: NSTextInputClient {
     ///   - actualRange: If non-NULL, contains the character range corresponding to the returned area if it was adjusted, for example, to a grapheme cluster boundary or characters in the first line fragment.
     /// - Returns: The boundary rectangle for the given range of characters, in screen coordinates. The rectangle's `size` value can be negative if the text flows to the left.
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
-        .zero
+        let caretRect = textViewController.caretRectInDocument(at: range.location)
+        let viewRect = scrollContentView.convert(caretRect, to: nil)
+        return window?.convertToScreen(viewRect) ?? .zero
     }
 
     /// Returns the index of the character whose bounding rectangle includes the given point.
