@@ -26,8 +26,6 @@ final class HighlightService {
     }
     private var mergedHighlightedRanges: [HighlightedRange] = []
     private var highlightedRangeFragmentsPerLine: [DocumentLineNodeID: [HighlightedRangeFragment]] = [:]
-    private var highlightedRangeFragmentsPerLineFragment: [LineFragmentID: [HighlightedRangeFragment]] = [:]
-
     init(lineManager: LineManager) {
         self.lineManager = lineManager
     }
@@ -45,18 +43,11 @@ final class HighlightService {
     }
 
     func highlightedRangeFragments(for lineFragment: LineFragment, inLineWithID lineID: DocumentLineNodeID) -> [HighlightedRangeFragment] {
-        if let lineFragmentHighlightRangeFragments = highlightedRangeFragmentsPerLineFragment[lineFragment.id] {
-            return lineFragmentHighlightRangeFragments
-        } else {
-            let highlightedLineFragments = createHighlightedLineFragments(for: lineFragment, inLineWithID: lineID)
-            highlightedRangeFragmentsPerLineFragment[lineFragment.id] = highlightedLineFragments
-            return highlightedLineFragments
-        }
+        createHighlightedLineFragments(for: lineFragment, inLineWithID: lineID)
     }
 
     func invalidateHighlightedRangeFragments() {
         highlightedRangeFragmentsPerLine.removeAll()
-        highlightedRangeFragmentsPerLineFragment.removeAll()
         highlightedRangeFragmentsPerLine = createHighlightedRangeFragmentsPerLine()
     }
 }
