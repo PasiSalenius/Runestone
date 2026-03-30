@@ -155,6 +155,7 @@ final class TextViewController {
                 lineControllerStorage.stringView = stringView
                 layoutManager.stringView = stringView
                 indentController.stringView = stringView
+                commentController.stringView = stringView
                 navigationService.stringView = stringView
                 #if os(macOS)
                 selectionService.stringView = stringView
@@ -167,6 +168,7 @@ final class TextViewController {
         didSet {
             if lineManager !== oldValue {
                 indentController.lineManager = lineManager
+                commentController.lineManager = lineManager
                 gutterWidthService.lineManager = lineManager
                 contentSizeService.lineManager = lineManager
                 highlightService.lineManager = lineManager
@@ -188,6 +190,7 @@ final class TextViewController {
     #endif
     let layoutManager: LayoutManager
     let indentController: IndentController
+    let commentController: CommentController
     let pageGuideController = PageGuideController()
     let highlightNavigationController = HighlightNavigationController()
     let timedUndoManager = TimedUndoManager()
@@ -627,9 +630,14 @@ final class TextViewController {
             indentStrategy: indentStrategy,
             indentFont: theme.font
         )
+        commentController = CommentController(
+            stringView: stringView,
+            lineManager: lineManager
+        )
         layoutManager.delegate = self
         applyThemeToChildren()
         indentController.delegate = self
+        commentController.delegate = self
         lineControllerStorage.delegate = self
         gutterWidthService.gutterLeadingPadding = gutterLeadingPadding
         gutterWidthService.gutterTrailingPadding = gutterTrailingPadding
@@ -807,5 +815,22 @@ extension TextViewController: IndentControllerDelegate {
 
     func indentControllerDidUpdateTabWidth(_ controller: IndentController) {
         invalidateLines()
+    }
+}
+
+// MARK: - CommentControllerDelegate
+extension TextViewController: CommentControllerDelegate {
+    func commentController(_ controller: CommentController, shouldInsert text: String, in range: NSRange) {
+        replaceText(in: range, with: text)
+    }
+
+    func commentController(_ controller: CommentController, shouldSelect range: NSRange) {
+        #if os(iOS)
+        textView.inputDelegate?.selectionWillChange(textView)
+        selectedRange = range
+        textView.inputDelegate?.selectionDidChange(textView)
+        #else
+        selectedRange = range
+        #endif
     }
 }

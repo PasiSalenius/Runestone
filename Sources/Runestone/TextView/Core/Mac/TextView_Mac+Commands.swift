@@ -340,6 +340,19 @@ public extension TextView {
         }
     }
 
+    // MARK: - Comments
+
+    /// Toggles line comments on the selected lines (or current line if no selection).
+    func toggleCommentOnSelectedLines() {
+        guard isEditable else {
+            return
+        }
+        guard let selectedRange = textViewController.selectedRange else {
+            return
+        }
+        textViewController.commentController.toggleComment(in: selectedRange)
+    }
+
     // MARK: - Text Transformations
 
     /// Transform selected text to uppercase

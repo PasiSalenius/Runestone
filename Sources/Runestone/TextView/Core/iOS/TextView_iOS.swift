@@ -854,6 +854,17 @@ open class TextView: UIScrollView {
         }
     }
 
+    /// Toggles line comments on the selected lines (or current line if no selection).
+    ///
+    /// If all non-blank selected lines are already commented with `//`, the comments are removed. Otherwise, `// ` is added after leading whitespace on each line.
+    public func toggleComment() {
+        if let selectedRange = textViewController.selectedRange {
+            inputDelegate?.textWillChange(self)
+            textViewController.commentController.toggleComment(in: selectedRange)
+            inputDelegate?.textDidChange(self)
+        }
+    }
+
     /// Moves the selected lines up by one line.
     ///
     /// Calling this function has no effect when the selected lines include the first line in the text view.
