@@ -343,6 +343,8 @@ public extension TextView {
     // MARK: - Comments
 
     /// Toggles line comments on the selected lines (or current line if no selection).
+    ///
+    /// For partial selections within a single line, wraps the selection in block comments (`/* */`).
     @objc func toggleCommentOnSelectedLines() {
         guard isEditable else {
             return
