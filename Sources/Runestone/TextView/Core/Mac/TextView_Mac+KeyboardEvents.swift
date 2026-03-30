@@ -4,10 +4,10 @@ import AppKit
 public extension TextView {
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let flags = event.modifierFlags
-        if flags.contains(.command),
-           !flags.contains(.control),
-           !flags.contains(.option),
-           event.charactersIgnoringModifiers == "/" {
+        // We want performKeyEquivalent to only consume the event when this text view actually has
+        // a selectedRange, meaning it's the active, focused editor.
+        if flags.contains(.command), !flags.contains(.control), !flags.contains(.option),
+           event.charactersIgnoringModifiers == "/", textViewController.selectedRange != nil {
             toggleCommentOnSelectedLines()
             return true
         }
