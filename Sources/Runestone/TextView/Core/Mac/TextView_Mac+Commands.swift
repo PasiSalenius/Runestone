@@ -343,7 +343,7 @@ public extension TextView {
     // MARK: - Comments
 
     /// Toggles line comments on the selected lines (or current line if no selection).
-    func toggleCommentOnSelectedLines() {
+    @objc func toggleCommentOnSelectedLines() {
         guard isEditable else {
             return
         }
