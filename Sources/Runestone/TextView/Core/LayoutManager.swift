@@ -48,6 +48,7 @@ final class LayoutManager {
             }
         }
     }
+    var isEditable = true
     var isEditing = false {
         didSet {
             if isEditing != oldValue {
@@ -519,7 +520,8 @@ extension LayoutManager {
             textBaselineY = (scaledHeight - totalLineHeight) / 2 + theme.font.ascender
         }
         let yPosition = textContainerInset.top + line.yPosition + textBaselineY - theme.lineNumberFont.ascender
-        lineNumberView.text = "\(line.index + 1)"
+        let isEmptyNonEditableView = !isEditable && stringView.string.length == 0
+        lineNumberView.text = isEmptyNonEditableView ? "" : "\(line.index + 1)"
         lineNumberView.font = theme.lineNumberFont
         lineNumberView.textColor = theme.lineNumberColor
         lineNumberView.frame = CGRect(x: xPosition, y: yPosition, width: gutterWidthService.lineNumberWidth, height: fontLineHeight)
