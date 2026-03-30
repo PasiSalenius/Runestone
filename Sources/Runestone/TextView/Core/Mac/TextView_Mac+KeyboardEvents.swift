@@ -3,11 +3,15 @@ import AppKit
 
 public extension TextView {
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        // performKeyEquivalent is sent to all views in the hierarchy, not just the first responder.
+        // Only handle key equivalents when this text view actually has focus, otherwise a non-focused
+        // editor will consume the event before the focused one gets a chance to handle it.
+        guard window?.firstResponder == self else {
+            return super.performKeyEquivalent(with: event)
+        }
         let flags = event.modifierFlags
-        // We want performKeyEquivalent to only consume the event when this text view actually has
-        // a selectedRange, meaning it's the active, focused editor.
         if flags.contains(.command), !flags.contains(.control), !flags.contains(.option),
-           event.charactersIgnoringModifiers == "/", textViewController.selectedRange != nil {
+           event.charactersIgnoringModifiers == "/" {
             toggleCommentOnSelectedLines()
             return true
         }
