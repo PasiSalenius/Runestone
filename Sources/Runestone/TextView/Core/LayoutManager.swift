@@ -81,9 +81,11 @@ final class LayoutManager {
         didSet {
             if selectedRange != oldValue {
                 updateShownViews()
+                setNeedsLayout()
             }
         }
     }
+    var selectionHighlightColor: MultiPlatformColor = .systemFill
     var lineHeightMultiplier: CGFloat = 1
     var constrainingLineWidth: CGFloat {
         if isLineWrappingEnabled {
@@ -458,6 +460,13 @@ extension LayoutManager {
                     for: lineFragment,
                     inLineWithID: line.id
                 )
+                if let selectedRange, selectedRange.length > 0 {
+                    let localSelectedRange = NSIntersectionRange(selectedRange, lineFragment.range)
+                    lineFragmentController.selectedRange = localSelectedRange.length > 0 ? localSelectedRange : nil
+                } else {
+                    lineFragmentController.selectedRange = nil
+                }
+                lineFragmentController.selectionColor = selectionHighlightColor
                 layoutLineFragmentView(for: lineFragmentController, lineYPosition: lineYPosition, lineFragmentFrame: &lineFragmentFrame)
                 maxY = lineFragmentFrame.maxY
             }

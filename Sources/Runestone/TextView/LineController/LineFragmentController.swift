@@ -65,6 +65,28 @@ final class LineFragmentController {
             }
         }
     }
+    var selectedRange: NSRange? {
+        get {
+            renderer.selectedRange
+        }
+        set {
+            if newValue != renderer.selectedRange {
+                renderer.selectedRange = newValue
+                lineFragmentView?.setNeedsDisplay()
+            }
+        }
+    }
+    var selectionColor: MultiPlatformColor {
+        get {
+            renderer.selectionColor
+        }
+        set {
+            if newValue != renderer.selectionColor {
+                renderer.selectionColor = newValue
+                lineFragmentView?.setNeedsDisplay()
+            }
+        }
+    }
 
     private let renderer: LineFragmentRenderer
 

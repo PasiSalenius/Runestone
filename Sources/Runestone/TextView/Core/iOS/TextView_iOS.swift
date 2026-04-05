@@ -128,6 +128,7 @@ open class TextView: UIScrollView {
     @objc public var selectionHighlightColor: UIColor = .label.withAlphaComponent(0.2) {
         didSet {
             if selectionHighlightColor != oldValue {
+                textViewController.layoutManager.selectionHighlightColor = selectionHighlightColor
                 updateCaretColor()
             }
         }
@@ -577,6 +578,7 @@ open class TextView: UIScrollView {
         editMenuController.delegate = self
         editMenuController.setupEditMenu(in: self)
         textViewController.highlightNavigationController.delegate = self
+        textViewController.layoutManager.selectionHighlightColor = selectionHighlightColor
         addSubview(textViewController.layoutManager.lineSelectionBackgroundView)
         addSubview(textViewController.layoutManager.linesContainerView)
         addSubview(textViewController.layoutManager.gutterContainerView)

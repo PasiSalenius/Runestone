@@ -435,6 +435,7 @@ open class TextView: NSView, NSMenuItemValidation {
     public var selectionHighlightColor: NSColor = .selectedTextBackgroundColor {
         didSet {
             if selectionHighlightColor != oldValue && isFirstResponder {
+                textViewController.layoutManager.selectionHighlightColor = selectionHighlightColor
                 updateSelectedRectangles()
             }
         }
@@ -443,6 +444,7 @@ open class TextView: NSView, NSMenuItemValidation {
     public var unemphasizedSelectionHighlightColor: NSColor = .unemphasizedSelectedTextBackgroundColor {
         didSet {
             if unemphasizedSelectionHighlightColor != oldValue && !isFirstResponder {
+                textViewController.layoutManager.selectionHighlightColor = unemphasizedSelectionHighlightColor
                 updateSelectedRectangles()
             }
         }
@@ -503,6 +505,7 @@ open class TextView: NSView, NSMenuItemValidation {
     private func setup() {
         textViewController.delegate = self
         textViewController.selectedRange = NSRange(location: 0, length: 0)
+        textViewController.layoutManager.selectionHighlightColor = selectionHighlightColor
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
         scrollView.documentView = scrollContentView
@@ -528,6 +531,7 @@ open class TextView: NSView, NSMenuItemValidation {
         guard super.becomeFirstResponder() else {
             return false
         }
+        textViewController.layoutManager.selectionHighlightColor = selectionHighlightColor
         needsLayout = true
         if shouldBeginEditing {
             isEditing = true
@@ -544,6 +548,7 @@ open class TextView: NSView, NSMenuItemValidation {
         guard super.resignFirstResponder() else {
             return false
         }
+        textViewController.layoutManager.selectionHighlightColor = unemphasizedSelectionHighlightColor
         needsLayout = true
         if shouldEndEditing {
             isEditing = false

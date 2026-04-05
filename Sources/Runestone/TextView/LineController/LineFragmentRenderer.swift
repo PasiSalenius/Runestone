@@ -18,6 +18,8 @@ final class LineFragmentRenderer {
     var markedTextBackgroundColor: MultiPlatformColor = .systemFill
     var markedTextBackgroundCornerRadius: CGFloat = 0
     var highlightedRangeFragments: [HighlightedRangeFragment] = []
+    var selectedRange: NSRange?
+    var selectionColor: MultiPlatformColor = .systemFill
 
     private var showInvisibleCharacters: Bool {
         invisibleCharacterConfiguration.showTabs
@@ -33,6 +35,7 @@ final class LineFragmentRenderer {
 
     func draw(to context: CGContext, inCanvasOfSize canvasSize: CGSize) {
         drawHighlightedRanges(to: context, inCanvasOfSize: canvasSize)
+        drawSelectionOverHighlightedRanges(to: context)
         drawMarkedRange(to: context)
         drawInvisibleCharacters()
         drawText(to: context)
@@ -72,6 +75,25 @@ private extension LineFragmentRenderer {
                 context.addPath(endPath)
                 context.fillPath()
             }
+        }
+        context.restoreGState()
+    }
+
+    private func drawSelectionOverHighlightedRanges(to context: CGContext) {
+        guard let selectedRange, !highlightedRangeFragments.isEmpty else {
+            return
+        }
+        context.saveGState()
+        for highlightedRange in highlightedRangeFragments {
+            let intersection = NSIntersectionRange(selectedRange, highlightedRange.range)
+            guard intersection.length > 0 else {
+                continue
+            }
+            let startX = CTLineGetOffsetForStringIndex(lineFragment.line, intersection.lowerBound, nil)
+            let endX = CTLineGetOffsetForStringIndex(lineFragment.line, intersection.upperBound, nil)
+            let rect = CGRect(x: startX, y: 0, width: endX - startX, height: lineFragment.scaledSize.height)
+            context.setFillColor(selectionColor.cgColor)
+            context.fill(rect)
         }
         context.restoreGState()
     }
