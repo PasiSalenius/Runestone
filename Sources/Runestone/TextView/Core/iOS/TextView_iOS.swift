@@ -1015,6 +1015,15 @@ open class TextView: UIScrollView {
         inputDelegate?.selectionDidChange(self)
     }
 
+    /// Replaces the text in the given range and positions the cursor at the specified range.
+    public func replace(_ range: NSRange, withText text: String, selectedRange: NSRange) {
+        let preparedText = textViewController.prepareTextForInsertion(text)
+        guard textViewController.shouldChangeText(in: range, replacementText: preparedText) else {
+            return
+        }
+        textViewController.replaceText(in: range, with: preparedText, selectedRangeAfterReplace: selectedRange)
+    }
+
     /// Returns the text in the specified range.
     /// - Parameter range: A range of text in the document.
     /// - Returns: The substring that falls within the specified range.
