@@ -792,7 +792,6 @@ extension TextViewController: LineControllerDelegate {
     }
 
     func lineControllerDidInvalidateSize(_ lineController: LineController) {
-        highlightService.invalidateHighlightedRangeFragments()
         textView.setNeedsLayout()
         layoutManager.setNeedsLayout()
     }
