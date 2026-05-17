@@ -79,11 +79,7 @@ private extension HighlightService {
                                                                         color: highlightedRange.color,
                                                                         textColor: highlightedRange.textColor,
                                                                         cornerRadius: highlightedRange.cornerRadius)
-                if let existingHighlightedRangeFragments = result[line.id] {
-                    result[line.id] = existingHighlightedRangeFragments + [highlightedRangeFragment]
-                } else {
-                    result[line.id] = [highlightedRangeFragment]
-                }
+                result[line.id, default: []].append(highlightedRangeFragment)
             }
         }
         return result
