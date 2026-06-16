@@ -7,6 +7,7 @@ protocol EditMenuControllerDelegate: AnyObject {
     func editMenuController(_ controller: EditMenuController, caretRectAt location: Int) -> CGRect
     func editMenuControllerShouldReplaceText(_ controller: EditMenuController)
     func selectedRange(for controller: EditMenuController) -> NSRange?
+    func editMenuController(_ controller: EditMenuController, customMenuItemsFor range: NSRange) -> [UIMenuElement]
 }
 
 final class EditMenuController: NSObject {
@@ -42,10 +43,16 @@ final class EditMenuController: NSObject {
     }
 
     func editMenu(for textRange: UITextRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
-        guard let textRange = textRange as? IndexedRange, let replaceAction = replaceActionIfAvailable(for: textRange.range) else {
+        guard let textRange = textRange as? IndexedRange else {
             return UIMenu(children: suggestedActions)
         }
-        return UIMenu(children: suggestedActions + [replaceAction])
+        let customMenuItems = delegate?.editMenuController(self, customMenuItemsFor: textRange.range) ?? []
+        var children = suggestedActions
+        children.insert(contentsOf: customMenuItems, at: min(1, children.count))
+        if let replaceAction = replaceActionIfAvailable(for: textRange.range) {
+            children.append(replaceAction)
+        }
+        return UIMenu(children: children)
     }
 }
 
@@ -96,10 +103,12 @@ extension EditMenuController: UIEditMenuInteractionDelegate {
         menuFor configuration: UIEditMenuConfiguration,
         suggestedActions: [UIMenuElement]
     ) -> UIMenu? {
-        if let selectedRange = delegate?.selectedRange(for: self), let replaceAction = replaceActionIfAvailable(for: selectedRange) {
-            return UIMenu(children: [replaceAction] + suggestedActions)
+        let selectedRange = delegate?.selectedRange(for: self)
+        let customMenuItems = selectedRange.map { delegate?.editMenuController(self, customMenuItemsFor: $0) ?? [] } ?? []
+        if let selectedRange, let replaceAction = replaceActionIfAvailable(for: selectedRange) {
+            return UIMenu(children: [replaceAction] + suggestedActions + customMenuItems)
         } else {
-            return UIMenu(children: suggestedActions)
+            return UIMenu(children: suggestedActions + customMenuItems)
         }
     }
 }

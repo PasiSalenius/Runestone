@@ -20,6 +20,23 @@ open class TextView: UIScrollView {
     }
     /// Delegate to receive callbacks for events triggered by the editor.
     public weak var editorDelegate: TextViewDelegate?
+    /// Describes a custom item to be added to the editing menu shown for a text selection.
+    public struct MenuItem {
+        /// The title of the menu item.
+        public let title: String
+        /// An optional image displayed next to the title.
+        public let image: UIImage?
+        /// The closure to invoke when the menu item is selected. Receives the currently selected text.
+        public let action: (String) -> Void
+
+        public init(title: String, image: UIImage? = nil, action: @escaping (String) -> Void) {
+            self.title = title
+            self.image = image
+            self.action = action
+        }
+    }
+    /// Custom menu items appended to the editing menu when a non-empty range of text is selected.
+    public var customMenuItems: [MenuItem] = []
     /// Whether the text view is in a state where the contents can be edited.
     public var isEditing: Bool {
         textViewController.isEditing
@@ -1465,6 +1482,28 @@ extension TextView: EditMenuControllerDelegate {
 
     func selectedRange(for controller: EditMenuController) -> NSRange? {
         selectedRange
+    }
+
+    func editMenuController(_ controller: EditMenuController, customMenuItemsFor range: NSRange) -> [UIMenuElement] {
+        guard range.length > 0 else {
+            return []
+        }
+        return customMenuItems.map { item in
+            UIAction(title: item.title, image: item.image) { [weak self] _ in
+                guard let self else {
+                    return
+                }
+                item.action(self.text(in: self.selectedRange) ?? "")
+            }
+        }
+    }
+}
+
+// MARK: - UITextInput edit menu
+extension TextView {
+    @objc(editMenuForTextRange:suggestedActions:)
+    public func editMenu(for textRange: UITextRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+        editMenuController.editMenu(for: textRange, suggestedActions: suggestedActions)
     }
 }
 
