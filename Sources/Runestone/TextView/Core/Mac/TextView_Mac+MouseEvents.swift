@@ -50,6 +50,37 @@ public extension TextView {
         }
     }
 
+    /// Informs the receiver that the bounds of its tracking areas need to be recalculated.
+    override func updateTrackingAreas() {
+        if let hoverTrackingArea {
+            removeTrackingArea(hoverTrackingArea)
+        }
+        let trackingArea = NSTrackingArea(
+            rect: .zero,
+            options: [.activeInKeyWindow, .inVisibleRect, .mouseMoved, .mouseEnteredAndExited],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(trackingArea)
+        hoverTrackingArea = trackingArea
+        super.updateTrackingAreas()
+    }
+
+    /// Informs the receiver that the user has moved the mouse with no buttons pressed.
+    /// - Parameter event: An object encapsulating information about the mouse-moved event.
+    override func mouseMoved(with event: NSEvent) {
+        super.mouseMoved(with: event)
+        updateHoverToolTip(for: event)
+    }
+
+    /// Informs the receiver that the cursor has exited a tracking area.
+    /// - Parameter event: An object encapsulating information about the mouse-exited event.
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        lastHoveredWordRange = nil
+        toolTip = nil
+    }
+
     /// Informs the receiver that the user has pressed the right mouse button.
     /// - Parameter event: An object encapsulating information about the mouse-down event.
     override func rightMouseDown(with event: NSEvent) {
@@ -105,6 +136,38 @@ private extension TextView {
     private func locationClosestToPoint(in event: NSEvent) -> Int {
         let point = scrollContentView.convert(event.locationInWindow, from: nil)
         return characterIndex(for: point)
+    }
+
+    private func updateHoverToolTip(for event: NSEvent) {
+        let point = scrollContentView.convert(event.locationInWindow, from: nil)
+        let location = characterIndex(for: point)
+        var range = textViewController.extendedWordRange(at: location)
+        if let wordRange = range, !pointIsWithinWord(point, range: wordRange) {
+            range = nil
+        }
+        guard range != lastHoveredWordRange else {
+            return
+        }
+        lastHoveredWordRange = range
+        if let wordRange = range, let toolTip = editorDelegate?.textView(self, toolTipForHoveredWordIn: wordRange), !toolTip.isEmpty {
+            self.toolTip = toolTip
+        } else {
+            self.toolTip = nil
+        }
+    }
+
+    private func pointIsWithinWord(_ point: CGPoint, range: NSRange) -> Bool {
+        let startRect = textViewController.caretRectInDocument(at: range.lowerBound)
+        let endRect = textViewController.caretRectInDocument(at: range.upperBound)
+        // A word that wraps onto another line spans multiple line fragments, so accept the
+        // hover without further horizontal checks rather than reject a valid word.
+        guard startRect.minY == endRect.minY else {
+            return true
+        }
+        guard point.y >= startRect.minY, point.y <= startRect.maxY else {
+            return false
+        }
+        return point.x >= startRect.minX && point.x <= endRect.maxX
     }
 
     private func startAutoscrollTimer() {

@@ -111,6 +111,16 @@ public protocol TextViewDelegate: AnyObject {
     ///   - event: The key-down event.
     /// - Returns: `true` if the delegate handled the event; `false` to let the text view handle it normally.
     func textView(_ textView: TextView, shouldHandleKeyDown event: NSEvent) -> Bool
+    /// Asks the delegate for a tooltip to show for the word the cursor is hovering over.
+    /// - Parameters:
+    ///   - textView: The text view in which the word is being hovered.
+    ///   - range: The extended-word range under the cursor, matching what a double-click would select.
+    /// - Returns: The string to show as a tooltip, or `nil` to show no tooltip.
+    ///
+    /// The text view calls this method when the hovered word changes and sets its tooltip to the returned value.
+    ///
+    /// Implementation of this method is optional and if no implementation is present, no tooltip is shown.
+    func textView(_ textView: TextView, toolTipForHoveredWordIn range: NSRange) -> String?
     #endif
 }
 
@@ -161,5 +171,7 @@ public extension TextViewDelegate {
 
     #if os(macOS)
     func textView(_ textView: TextView, shouldHandleKeyDown event: NSEvent) -> Bool { false }
+
+    func textView(_ textView: TextView, toolTipForHoveredWordIn range: NSRange) -> String? { nil }
     #endif
 }

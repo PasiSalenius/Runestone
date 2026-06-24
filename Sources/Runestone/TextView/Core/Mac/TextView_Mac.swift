@@ -464,6 +464,9 @@ open class TextView: NSView, NSMenuItemValidation {
     // Autoscroll support for text selection
     var autoscrollTimer: Timer?
     var currentDragEvent: NSEvent?
+    // Hover tooltip support
+    var hoverTrackingArea: NSTrackingArea?
+    var lastHoveredWordRange: NSRange?
     private var isWindowKey = false {
         didSet {
             if isWindowKey != oldValue {

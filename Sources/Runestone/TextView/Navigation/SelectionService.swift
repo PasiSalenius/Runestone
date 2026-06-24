@@ -154,6 +154,16 @@ final class SelectionService {
         }
     }
 
+    func extendedWordRange(at location: Int) -> NSRange? {
+        guard location >= 0 && location < stringView.string.length else {
+            return nil
+        }
+        guard isExtendedWordCharacter(at: location) else {
+            return nil
+        }
+        return rangeOfExtendedWord(at: location)
+    }
+
     func rangeBySelectingLine(at location: Int) -> NSRange {
         guard let line = lineManager.line(containingCharacterAt: location) else {
             return NSRange(location: location, length: 0)

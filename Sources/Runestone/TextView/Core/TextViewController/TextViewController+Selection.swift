@@ -80,6 +80,10 @@ extension TextViewController {
         selectedRange = range
     }
 
+    func extendedWordRange(at location: Int) -> NSRange? {
+        selectionService.extendedWordRange(at: location)
+    }
+
     func selectLine(at location: Int) {
         let range = selectionService.rangeBySelectingLine(at: location)
         // Ensure the entire line is laid out before setting selection
