@@ -370,6 +370,12 @@ open class TextView: NSView, NSMenuItemValidation {
             textViewController.isAutomaticScrollEnabled = newValue
         }
     }
+    /// Height of the text view's content, excluding any overscroll.
+    ///
+    /// Use this to size the text view to fit its content, for example when hosting it in an enclosing scroll view.
+    public var contentHeight: CGFloat {
+        textViewController.contentSizeService.contentHeight
+    }
     /// Amount of overscroll to add in the vertical direction.
     ///
     /// The overscroll is a factor of the scrollable area height and will not take into account any insets. 0 means no overscroll and 1 means an amount equal to the height of the text view. Detaults to 0.

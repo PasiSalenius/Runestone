@@ -69,6 +69,11 @@ public protocol TextViewDelegate: AnyObject {
     ///
     /// The gutter width may change when inserting or deleting lines, possibly causing the widest text in the gutter to change.
     func textViewDidChangeGutterWidth(_ textView: TextView)
+    /// Tells the delegate that the size of the text view's content changed.
+    /// - Parameter textView: The text view in which the content size changed.
+    ///
+    /// The content size may change when editing the text, when laying out lines that were previously only estimated, or when the text view is resized and the text rewraps.
+    func textViewDidChangeContentSize(_ textView: TextView)
     /// Tells the delegate that a floating cursor interaction was started.
     /// - Parameter textView: The text view in which the interaction started.
     ///
@@ -154,6 +159,7 @@ public extension TextViewDelegate {
     }
 
     func textViewDidChangeGutterWidth(_ textView: TextView) {}
+    func textViewDidChangeContentSize(_ textView: TextView) {}
 
     func textViewDidBeginFloatingCursor(_ textView: TextView) {}
 

@@ -34,6 +34,7 @@ extension TextViewController {
         scrollView.contentSize = contentSizeService.contentSize
         scrollView.contentOffset = oldContentOffset
         textView.setNeedsLayout()
+        textView.editorDelegate?.textViewDidChangeContentSize(textView)
     }
 
     #if os(macOS)
