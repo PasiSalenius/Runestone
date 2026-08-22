@@ -36,7 +36,7 @@ public extension TextView {
         // Store the current mouse event for autoscrolling
         currentDragEvent = event
         // Trigger immediate autoscroll when mouse moves
-        scrollContentView.autoscroll(with: event)
+        performAutoscroll()
     }
 
     /// Informs the receiver that the user has released the left mouse button.
@@ -132,6 +132,10 @@ public extension TextView {
 }
 
 private extension TextView {
+    enum AutoscrollDirection {
+        case up
+        case down
+    }
 
     private func locationClosestToPoint(in event: NSEvent) -> Int {
         let point = scrollContentView.convert(event.locationInWindow, from: nil)
@@ -190,11 +194,38 @@ private extension TextView {
     }
 
     private func performAutoscroll() {
-        // Call autoscroll with the last mouse event
-        // This enables continuous scrolling when mouse is held still outside visible area
-        if let event = currentDragEvent {
-            scrollContentView.autoscroll(with: event)
+        guard let event = currentDragEvent, let direction = autoscrollDirection(for: event) else {
+            return
         }
+        let scrollAmount = textViewController.estimatedLineHeight
+        let distance = direction == .up ? scrollAmount * -1 : scrollAmount
+        let scrollView = textViewController.scrollView
+        let offset = scrollView.contentOffset
+        let newY = min(max(offset.y + distance, scrollView.minimumContentOffset.y), scrollView.maximumContentOffset.y)
+        if newY != offset.y {
+            scrollView.contentOffset = CGPoint(x: offset.x, y: newY)
+        }
+        // A text view laid out at its content height has nowhere to scroll, so the movement it could
+        // not make itself is handed to whoever is hosting it.
+        let remainingDistance = distance - (newY - offset.y)
+        if remainingDistance != 0 {
+            editorDelegate?.textView(self, autoscrollBy: remainingDistance)
+        }
+        // The mouse may be standing still while the content moves underneath it, so the selection is
+        // extended to whatever the same point on screen now refers to.
+        textViewController.extendDraggedSelection(to: locationClosestToPoint(in: event))
+    }
+
+    private func autoscrollDirection(for event: NSEvent) -> AutoscrollDirection? {
+        let edgeInset: CGFloat = 40
+        let point = convert(event.locationInWindow, from: nil)
+        let visibleBounds = visibleRect
+        if point.y < visibleBounds.minY + edgeInset {
+            return .up
+        } else if point.y > visibleBounds.maxY - edgeInset {
+            return .down
+        }
+        return nil
     }
 }
 #endif

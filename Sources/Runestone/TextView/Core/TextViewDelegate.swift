@@ -74,6 +74,13 @@ public protocol TextViewDelegate: AnyObject {
     ///
     /// The content size may change when editing the text, when laying out lines that were previously only estimated, or when the text view is resized and the text rewraps.
     func textViewDidChangeContentSize(_ textView: TextView)
+    /// Tells the delegate how far the text view wants to autoscroll a drag-selection past its edge when it cannot scroll itself.
+    /// - Parameters:
+    ///   - textView: The text view that wants to scroll.
+    ///   - distance: The distance to scroll, positive downwards.
+    ///
+    /// A text view laid out at its content height inside another scroll view cannot scroll itself, so the enclosing scroll view has to take the movement on its behalf.
+    func textView(_ textView: TextView, autoscrollBy distance: CGFloat)
     /// Tells the delegate that a floating cursor interaction was started.
     /// - Parameter textView: The text view in which the interaction started.
     ///
@@ -160,6 +167,7 @@ public extension TextViewDelegate {
 
     func textViewDidChangeGutterWidth(_ textView: TextView) {}
     func textViewDidChangeContentSize(_ textView: TextView) {}
+    func textView(_ textView: TextView, autoscrollBy distance: CGFloat) {}
 
     func textViewDidBeginFloatingCursor(_ textView: TextView) {}
 
