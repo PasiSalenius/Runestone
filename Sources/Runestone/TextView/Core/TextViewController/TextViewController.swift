@@ -132,11 +132,7 @@ final class TextViewController {
             if scrollViewSize != oldValue {
                 contentSizeService.scrollViewSize = scrollViewSize
                 layoutManager.scrollViewWidth = scrollViewSize.width
-                if isLineWrappingEnabled {
-                    for lineController in lineControllerStorage {
-                        lineController.invalidateTypesetting()
-                    }
-                }
+                invalidateTypesettingForConstrainingWidthChange()
             }
         }
     }
@@ -144,6 +140,8 @@ final class TextViewController {
         didSet {
             if safeAreaInsets != oldValue {
                 layoutManager.safeAreaInsets = safeAreaInsets
+                contentSizeService.invalidateContentSize()
+                invalidateTypesettingForConstrainingWidthChange()
             }
         }
     }
@@ -412,8 +410,8 @@ final class TextViewController {
             if newValue != layoutManager.textContainerInset {
                 contentSizeService.textContainerInset = newValue
                 layoutManager.textContainerInset = newValue
-                layoutManager.setNeedsLayout()
-                textView.setNeedsLayout()
+                contentSizeService.invalidateContentSize()
+                invalidateTypesettingForConstrainingWidthChange()
             }
         }
     }
@@ -732,9 +730,8 @@ private extension TextViewController {
         gutterWidthService.didUpdateGutterWidth.sink { [weak self] in
             if let self = self, let textView = self._textView {
                 // Typeset lines again when the line number width changes since changing line number width may increase or reduce the number of line fragments in a line.
-                textView.setNeedsLayout()
                 self.invalidateLines()
-                self.layoutManager.setNeedsLayout()
+                self.invalidateTypesettingForConstrainingWidthChange()
                 textView.editorDelegate?.textViewDidChangeGutterWidth(self.textView)
             }
         }.store(in: &cancellables)

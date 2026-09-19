@@ -20,6 +20,16 @@ extension TextViewController {
         layoutPageGuideIfNeeded()
     }
 
+    func invalidateTypesettingForConstrainingWidthChange() {
+        if isLineWrappingEnabled {
+            for lineController in lineControllerStorage {
+                lineController.invalidateTypesetting()
+            }
+        }
+        layoutManager.setNeedsLayout()
+        textView.setNeedsLayout()
+    }
+
     func invalidateLines() {
         for lineController in lineControllerStorage {
             lineController.lineFragmentHeightMultiplier = lineHeightMultiplier
