@@ -173,17 +173,18 @@ private extension LineTypesetter {
     private func makeNextLineFragment(using typesetter: CTTypesetter) -> LineFragment? {
         // suggestNextLineBreak(using:) uses CTTypesetterSuggestLineBreak but it may return lines that are longer than our constraining width.
         // In that case we keep removeing characters from the line until we're below the constraining width.
+        // A fragment must always contain at least one character, both to make progress and because a
+        // zero-length CFRange makes CTTypesetterCreateLine typeset the rest of the paragraph.
         var length = suggestNextLineBreak(using: typesetter)
-        var lineFragment: LineFragment?
-        while lineFragment == nil || lineFragment!.scaledSize.width > constrainingWidth {
-            let visibleRange = CFRangeMake(startOffset, length)
-            lineFragment = makeLineFragment(for: visibleRange, in: typesetter, lineFragmentIndex: lineFragmentIndex, yPosition: nextYPosition)
-            length -= 1
-        }
-        guard let lineFragment else {
+        guard length > 0 else {
             return nil
         }
-        let whitespaceLength = lengthOfWhitespace(after: startOffset + length)
+        var lineFragment = makeLineFragment(for: CFRangeMake(startOffset, length), in: typesetter, lineFragmentIndex: lineFragmentIndex, yPosition: nextYPosition)
+        while lineFragment.scaledSize.width > constrainingWidth && length > 1 {
+            length -= 1
+            lineFragment = makeLineFragment(for: CFRangeMake(startOffset, length), in: typesetter, lineFragmentIndex: lineFragmentIndex, yPosition: nextYPosition)
+        }
+        let whitespaceLength = lengthOfWhitespace(after: startOffset + lineFragment.range.length - 1)
         guard whitespaceLength > 0 else {
             return lineFragment
         }
@@ -234,7 +235,10 @@ private extension LineTypesetter {
         let visibleRange = NSRange(location: visibleRange.location, length: visibleRange.length)
         // Extract attributed string substring for this line fragment
         let fragmentAttributedString: NSAttributedString
-        if let attributedString, visibleRange.location + visibleRange.length <= attributedString.length {
+        if let attributedString,
+           visibleRange.location >= 0,
+           visibleRange.length >= 0,
+           visibleRange.location + visibleRange.length <= attributedString.length {
             fragmentAttributedString = attributedString.attributedSubstring(from: visibleRange)
         } else {
             fragmentAttributedString = NSAttributedString()
